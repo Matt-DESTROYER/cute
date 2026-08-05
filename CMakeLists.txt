@@ -6,9 +6,14 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 project(cute C)
 
-file(GLOB SRC "src/*.c")
+add_subdirectory(src/file_io)
+add_subdirectory(src/ini)
 
+set(SRC src/main.c src/new.c)
 add_executable(cute ${SRC})
+
+target_link_libraries(cute PRIVATE file_io)
+target_link_libraries(cute PRIVATE ini)
 
 if(MSVC)
 	target_compile_options(cute PRIVATE /W4 /WX /O2)
