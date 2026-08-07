@@ -1,3 +1,4 @@
+#include "tools.h"
 #include "file_io.h"
 
 #if __WINDOWS
@@ -37,6 +38,14 @@ bool path_exists(const char* path) {
 #else
 	struct stat path_stat;
 	return stat(path, &path_stat) == 0;
+#endif
+}
+
+bool directory_create(const char* path) {
+#if __WINDOWS
+	return CreateDirectoryA(path, NULL) != 0;
+#else
+	return mkdir(path, 0777) == 0;
 #endif
 }
 

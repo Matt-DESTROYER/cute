@@ -6,12 +6,14 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 project(cute C)
 
+add_subdirectory(src/tools)
 add_subdirectory(src/file_io)
 add_subdirectory(src/ini)
 
 set(SRC src/main.c src/new.c)
 add_executable(cute ${SRC})
 
+target_link_libraries(cute PRIVATE tools)
 target_link_libraries(cute PRIVATE file_io)
 target_link_libraries(cute PRIVATE ini)
 
