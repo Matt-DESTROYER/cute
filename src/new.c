@@ -80,4 +80,3 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	return SUCCESS;
 }
 
-

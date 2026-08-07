@@ -1,6 +1,10 @@
 # cute
 A (somewhat opinionated) mini package manager for C!
 
+## Dependencies
+ - libcurl (planned to remove at some point)
+ - git
+
 ## Planned functionality
  - Initialise a C program (similar to `cargo new`)
  - 'Install' libraries (similar to `cargo add`, will be limited as to where they can be installed from)
@@ -26,6 +30,10 @@ version = "1.0.0"
 [dependencies]
 package-a = "1.5.2"
 package-b = "2.1"
+
+; source URL overrides (neccessity for now)
+[overide-source]
+package-a = "https://github.com/Username/Repository.git"
 ```
 
 ## Building from source

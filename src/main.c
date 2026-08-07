@@ -1,3 +1,4 @@
+#include "network.h"
 #include "new.h"
 
 #include <stdio.h>
@@ -9,6 +10,8 @@ int main(int argc, char* argv[]) {
 		printf("No arguments supplied... doing nothing!\n");
 		return EXIT_SUCCESS;
 	}
+
+	network_init();
 	
 	if (strcmp(argv[1], "new") == 0) {
 		/*new_project_result_t res = */new_project(argc, argv);
@@ -21,6 +24,8 @@ int main(int argc, char* argv[]) {
 	} else {
 		printf("Unknown argument supplied... doing nothing!\n");
 	}
+
+	network_cleanup();
 
 	return EXIT_SUCCESS;
 }

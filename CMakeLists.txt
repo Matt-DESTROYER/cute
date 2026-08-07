@@ -8,14 +8,13 @@ project(cute C)
 
 add_subdirectory(src/tools)
 add_subdirectory(src/file_io)
+add_subdirectory(src/network)
 add_subdirectory(src/ini)
 
 set(SRC src/main.c src/new.c)
 add_executable(cute ${SRC})
 
-target_link_libraries(cute PRIVATE tools)
-target_link_libraries(cute PRIVATE file_io)
-target_link_libraries(cute PRIVATE ini)
+target_link_libraries(cute PRIVATE tools file_io network ini)
 
 if(MSVC)
 	target_compile_options(cute PRIVATE /W4 /WX /O2)
