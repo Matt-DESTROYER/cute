@@ -2,6 +2,9 @@
 #include "file_io.h"
 #include "new.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 const char* CUTE_INI = "; cute package manager settings\n\
 [cute]\n\
 version = 0\n\
@@ -79,7 +82,7 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	for (int i = 2; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			if (project_name != NULL)
-				return INVALID_ARGS;
+				return PROJECT_INVALID_ARGS;
 
 			project_name = argv[i];
 			continue;
@@ -87,7 +90,7 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	}
 
 	if (project_name == NULL)
-		return NO_PROJECT_NAME;
+		return PROJECT_NO_NAME;
 
 	char* directory = format("./%s", project_name);
 	char* ini_path = format("%s/Cute.ini", directory);
@@ -100,9 +103,8 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	char* include_dir = format("%s/.includes", directory);
 	char* libraries_dir = format("%s/.libraries", directory);
 
-	if (directory_exists(project_name)) {
+	if (directory_exists(project_name))
 		return PROJECT_DIR_ALREADY_EXISTS;
-	}
 
 	directory_create(project_name);
 
@@ -132,6 +134,6 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	free(include_dir);
 	free(libraries_dir);
 
-	return SUCCESS;
+	return PROJECT_SUCCESS;
 }
 

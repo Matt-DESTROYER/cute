@@ -11,7 +11,7 @@ add_subdirectory(src/file_io)
 add_subdirectory(src/network)
 add_subdirectory(src/ini)
 
-set(SRC src/main.c src/new.c)
+set(SRC src/main.c src/new.c src/add.c)
 add_executable(cute ${SRC})
 
 target_link_libraries(cute PRIVATE tools file_io network ini)
