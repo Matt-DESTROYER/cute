@@ -2,7 +2,7 @@
 A (somewhat opinionated) mini package manager for C!
 
 ## Dependencies
- - libcurl (planned to remove at some point)
+ - libcurl (planned to remove at some point, and just have a small TLS library/pure sockets)
  - git
 
 ## Planned functionality
@@ -33,7 +33,7 @@ package-b = "2.1"
 
 ; source URL overrides (neccessity for now)
 [overide-source]
-package-a = "https://github.com/Username/Repository.git"
+package-a = "https://somedomain.ext/path/to/repo.git"
 ```
 
 ## Building from source

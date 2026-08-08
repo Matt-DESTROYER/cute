@@ -12,7 +12,11 @@
 	#define _FILE_OFFSET_BITS 64
 #endif
 
+#include <stdbool.h>
+
 char* format(const char* template_string, ...);
+
+bool fetch_package(const char* repo_url, const char* package_name, const char* version);
 
 #endif
 
