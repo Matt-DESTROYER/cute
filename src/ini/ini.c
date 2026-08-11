@@ -79,10 +79,17 @@ void assoc_arr_push(assoc_arr_t* assoc_arr, char* key, char* value) {
 }
 
 void assoc_arr_pop(assoc_arr_t* assoc_arr) {
+	if (assoc_arr->tail == NULL)
+		return;
+
 	assoc_arr_item_t* temp = assoc_arr->tail;
 
 	assoc_arr->tail = assoc_arr->tail->prev;
-	assoc_arr->tail->next = NULL;
+	if (assoc_arr->tail == NULL) {
+		assoc_arr->head = NULL;
+	} else {
+		assoc_arr->tail->next = NULL;
+	}
 	assoc_arr->size--;
 
 	free(temp);
@@ -94,15 +101,25 @@ void assoc_arr_remove(assoc_arr_t* assoc_arr, const char* key) {
 
 	assoc_arr_item_t* current = assoc_arr->head;
 
-	while (strcmp(current->key, key) != 0) {
+	while (current != NULL &&
+			strcmp(current->key, key) != 0) {
 		current = current->next;
-
-		if (current == NULL)
-			return;
 	}
 
-	current->prev->next = current->next;
-	current->next->prev = current->prev;
+	if (current == NULL)
+		return;
+
+	if (current->prev != NULL) {
+		current->prev->next = current->next;
+	} else {
+		assoc_arr->head = current->next;
+	}
+
+	if (current->next != NULL) {
+		current->next->prev = current->prev;
+	} else {
+		assoc_arr->tail = current->prev;
+	}
 
 	free(current);
 }
@@ -113,12 +130,13 @@ char* assoc_arr_search(assoc_arr_t assoc_arr, const char* key) {
 
 	assoc_arr_item_t* current = assoc_arr.head;
 
-	while (strcmp(current->key, key) != 0) {
+	while (current != NULL &&
+			strcmp(current->key, key) != 0) {
 		current = current->next;
-
-		if (current == NULL)
-			return NULL;
 	}
+
+	if (current == NULL)
+		return NULL;
 
 	return current->value;
 }
@@ -185,15 +203,25 @@ void ini_table_arr_remove_table(ini_table_arr_t* table_arr, const char* key) {
 
 	ini_table_item_t* current = table_arr->head;
 
-	while (strcmp(current->table.name, key) != 0) {
+	while (current != NULL &&
+			strcmp(current->table.name, key) != 0) {
 		current = current->next;
-
-		if (current == NULL)
-			return;
 	}
 
-	current->prev->next = current->next;
-	current->next->prev = current->prev;
+	if (current == NULL)
+		return;
+
+	if (current->prev != NULL) {
+		current->prev->next = current->next;
+	} else {
+		table_arr->head = current->next;
+	}
+
+	if (current->next != NULL) {
+		current->next->prev = current->prev;
+	} else {
+		table_arr->tail = current->prev;
+	}
 
 	free(current);
 }
@@ -204,12 +232,13 @@ ini_table_t* ini_table_arr_search_tables(ini_table_arr_t table_arr, const char* 
 
 	ini_table_item_t* current = table_arr.head;
 
-	while (strcmp(current->table.name, key) != 0) {
+	while (current != NULL &&
+			strcmp(current->table.name, key) != 0) {
 		current = current->next;
-
-		if (current == NULL)
-			return NULL;
 	}
+
+	if (current == NULL)
+		return NULL;
 
 	return &current->table;
 }
@@ -231,9 +260,9 @@ void ini_table_arr_remove_from_table(ini_table_arr_t* table_arr, const char* tab
 }
 
 bool valid_table_char(char c) {
-	return ((c >= 'a') && (c <= 'z')) ||
-		((c >= 'A') && (c <= 'Z')) ||
-		((c == '-') || (c == '_'));
+	return (c >= 'a' && c <= 'z') ||
+		(c >= 'A' && c <= 'Z') ||
+		(c == '-' || c == '_');
 }
 
 bool valid_table_name(const char* name, size_t length) {
@@ -249,9 +278,9 @@ bool valid_table_name(const char* name, size_t length) {
 }
 
 bool valid_key_char(char c) {
-	return ((c >= 'a') && (c <= 'z')) ||
-		((c >= 'A') && (c <= 'Z')) ||
-		((c == '-') || (c == '_'));
+	return (c >= 'a' && c <= 'z') ||
+		(c >= 'A' && c <= 'Z') ||
+		(c == '-' || c == '_');
 }
 
 bool valid_key(const char* name, size_t length) {
@@ -267,7 +296,7 @@ bool valid_key(const char* name, size_t length) {
 }
 
 bool is_whitespace(char c) {
-	return (c == ' ') || (c == '\n' || (c == '\t'));
+	return c == ' ' || (c == '\n' || c == '\t');
 }
 
 /* TODO: bounds checking for like literally every nested loop... */
@@ -289,26 +318,37 @@ bool ini_read(ini_t* ini, char* ini_path) {
 	for (size_t i = 0; i < ini_file_content_length; i++) {
 		// comments
 		if (ini_file_content[i] == ';') {
-			while (ini_file_content[i] != '\n') i++;
+			while (i < ini_file_content_length &&
+					ini_file_content[i] != '\n') i++;
 			continue;
 		}
 		// table headers
 		else if (ini_file_content[i] == '[') {
 			i++;
 			size_t table_start = i;
-			while ((ini_file_content[i] != ']') &&
-					(!is_whitespace(ini_file_content[i]))) {
+			while (i < ini_file_content_length &&
+					ini_file_content[i] != ']' &&
+					!is_whitespace(ini_file_content[i])) {
 				i++;
+			}
+
+			if (i >= ini_file_content_length) {
+				error_occurred = 1;
+				break;
 			}
 
 			size_t table_length = i - table_start;
 			char* table_header = bounded_strdup(ini_file_content, table_start, table_length);
 			if (table_header == NULL) {
+				free(table_header);
+
 				error_occurred = 1;
 				break;
 			}
 
 			if (!valid_table_name(table_header, table_length)) {
+				free(table_header);
+
 				error_occurred = 1;
 				break;
 			}
@@ -324,39 +364,86 @@ bool ini_read(ini_t* ini, char* ini_path) {
 		else {
 			// read the key
 			size_t key_start = i;
-			while ((!is_whitespace(ini_file_content[i])) &&
-					(ini_file_content[i] != '='))
+			while (i < ini_file_content_length &&
+					!is_whitespace(ini_file_content[i]) &&
+					ini_file_content[i] != '=')
 				i++;
+
+			if (i >= ini_file_content_length) {
+				error_occurred = 1;
+				break;
+			}
 
 			size_t key_length = i - key_start;
 			char* key = bounded_strdup(ini_file_content, key_start, key_length);
 			if (key == NULL) {
+				free(key);
+
 				error_occurred = 1;
 				break;
 			}
 
 			// skip whitespace
-			while (is_whitespace(ini_file_content[i])) i++;
+			while (i < ini_file_content_length &&
+					is_whitespace(ini_file_content[i])) i++;
+
+			if (i >= ini_file_content_length) {
+				free(key);
+
+				error_occurred = 1;
+				break;
+			}
 
 			// we expect '=', confirm valid formatting
 			if (ini_file_content[i] != '=') {
+				free(key);
+
 				error_occurred = 1;
 				break;
 			}
 
 			// whitespace again
-			while (is_whitespace(ini_file_content[i])) i++;
+			while (i < ini_file_content_length && 
+					is_whitespace(ini_file_content[i])) i++;
+
+			if (i >= ini_file_content_length) {
+				free(key);
+
+				error_occurred = 1;
+				break;
+			}
 
 			// now we read the value
-			while (ini_file_content[i] != '"') i++;
+			while (i < ini_file_content_length &&
+					ini_file_content[i] != '"') i++;
 			i++;
+
+			if (i >= ini_file_content_length) {
+				free(key);
+
+				error_occurred = 1;
+				break;
+			}
 
 			size_t value_start = i;
 
-			while (ini_file_content[i] != '"' || ini_file_content[i - 1] == '\\') i++;
+			while (i < ini_file_content_length &&
+					(ini_file_content[i] != '"' ||
+					ini_file_content[i - 1] == '\\')) i++;
+
+			if (i >= ini_file_content_length) {
+				free(key);
+
+				error_occurred = 1;
+				break;
+			}
 
 			size_t value_length = i - value_start;
 			char* value = bounded_strdup(ini_file_content, value_start, value_length);
+
+			if (ini->table.size == 0) {
+				ini_table_arr_add_table(&ini->table, ini_table_new("global"));
+			}
 
 			ini_table_t* table = ini_table_arr_get_last(ini->table);
 			ini_table_arr_add_to_table(&ini->table, table->name, key, value);
