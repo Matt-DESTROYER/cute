@@ -1,6 +1,10 @@
 # Build directory
 build/
 
+# Annoying editor stuff
+.cache/
+.vscode/
+
 # Prerequisites
 *.d
 
