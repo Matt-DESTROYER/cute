@@ -1,2 +1,382 @@
+#include "tools.h"
+#include "file_io.h"
+#include "ini.h"
+
 #include <stdio.h>
+#include <string.h>
+
+typedef struct assoc_arr_item assoc_arr_item_t;
+struct assoc_arr_item {
+	char* key;
+	char* value;
+
+	assoc_arr_item_t* next;
+	assoc_arr_item_t* prev;
+};
+
+typedef struct assoc_arr {
+	assoc_arr_item_t* head;
+	assoc_arr_item_t* tail;
+
+	size_t size;
+} assoc_arr_t;
+
+typedef struct ini_table {
+	char* name;
+
+	assoc_arr_t table;
+} ini_table_t;
+
+typedef struct ini_table_item ini_table_item_t;
+struct ini_table_item {
+	ini_table_t table;
+
+	ini_table_item_t* next;
+	ini_table_item_t* prev;
+};
+
+typedef struct ini_table_arr {
+	ini_table_item_t* head;
+	ini_table_item_t* tail;
+
+	size_t size;
+} ini_table_arr_t;
+
+// typedefed in header (this should be the only publicly exposed struct)
+struct ini {
+	char* file_path;
+
+	ini_table_arr_t table;
+};
+
+assoc_arr_t assoc_arr_new() {
+	assoc_arr_t assoc_arr = {
+		.head = NULL,
+		.tail = NULL,
+		.size = 0
+	};
+	return assoc_arr;
+}
+
+void assoc_arr_push(assoc_arr_t* assoc_arr, char* key, char* value) {
+	assoc_arr_item_t* item = malloc(sizeof(assoc_arr_item_t));
+	item->key = key;
+	item->value = value;
+	item->next = NULL;
+	item->prev = NULL;
+
+	if (assoc_arr->head == NULL) {
+		assoc_arr->head = item;
+		assoc_arr->tail = item;
+		return;
+	}
+
+	assoc_arr->tail->next = item;
+	item->prev = assoc_arr->tail;
+	assoc_arr->tail = item;
+
+	assoc_arr->size++;
+}
+
+void assoc_arr_pop(assoc_arr_t* assoc_arr) {
+	assoc_arr_item_t* temp = assoc_arr->tail;
+
+	assoc_arr->tail = assoc_arr->tail->prev;
+	assoc_arr->tail->next = NULL;
+	assoc_arr->size--;
+
+	free(temp);
+}
+
+void assoc_arr_remove(assoc_arr_t* assoc_arr, const char* key) {
+	if (assoc_arr->head == NULL)
+		return;
+
+	assoc_arr_item_t* current = assoc_arr->head;
+
+	while (strcmp(current->key, key) != 0) {
+		current = current->next;
+
+		if (current == NULL)
+			return;
+	}
+
+	current->prev->next = current->next;
+	current->next->prev = current->prev;
+
+	free(current);
+}
+
+char* assoc_arr_search(assoc_arr_t assoc_arr, const char* key) {
+	if (assoc_arr.head == NULL)
+		return NULL;
+
+	assoc_arr_item_t* current = assoc_arr.head;
+
+	while (strcmp(current->key, key) != 0) {
+		current = current->next;
+
+		if (current == NULL)
+			return NULL;
+	}
+
+	return current->value;
+}
+
+ini_table_t ini_table_new(char* name) {
+	ini_table_t table = {
+		.name = name,
+		.table = assoc_arr_new()
+	};
+	return table;
+}
+
+void ini_table_push(ini_table_t* ini_table, char* key, char* value) {
+	assoc_arr_push(&ini_table->table, key, value);
+}
+
+void ini_table_pop(ini_table_t* ini_table) {
+	assoc_arr_pop(&ini_table->table);
+}
+
+void ini_table_remove(ini_table_t* ini_table, const char* key) {
+	assoc_arr_remove(&ini_table->table, key);
+}
+
+char* ini_table_search(ini_table_t ini_table, const char* key) {
+	return assoc_arr_search(ini_table.table, key);
+}
+
+ini_table_arr_t ini_table_arr_new() {
+	ini_table_arr_t table_arr = {
+		.head = NULL,
+		.tail = NULL,
+		.size = 0
+	};
+	return table_arr;
+}
+
+ini_table_t* ini_table_arr_get_last(ini_table_arr_t table_arr) {
+	return &table_arr.tail->table;
+}
+
+void ini_table_arr_add_table(ini_table_arr_t* table_arr, ini_table_t table) {
+	ini_table_item_t* item = (ini_table_item_t*)malloc(sizeof(ini_table_item_t));
+	item->table = table;
+	item->next = NULL;
+	item->prev = NULL;
+
+	if (table_arr->head == NULL) {
+		table_arr->head = item;
+		table_arr->tail = item;
+		return;
+	}
+
+	table_arr->tail->next = item;
+	item->prev = table_arr->tail;
+	table_arr->tail = item;
+
+	table_arr->size++;
+}
+
+void ini_table_arr_remove_table(ini_table_arr_t* table_arr, const char* key) {
+	if (table_arr->head == NULL)
+		return;
+
+	ini_table_item_t* current = table_arr->head;
+
+	while (strcmp(current->table.name, key) != 0) {
+		current = current->next;
+
+		if (current == NULL)
+			return;
+	}
+
+	current->prev->next = current->next;
+	current->next->prev = current->prev;
+
+	free(current);
+}
+
+ini_table_t* ini_table_arr_search_tables(ini_table_arr_t table_arr, const char* key) {
+	if (table_arr.head == NULL)
+		return NULL;
+
+	ini_table_item_t* current = table_arr.head;
+
+	while (strcmp(current->table.name, key) != 0) {
+		current = current->next;
+
+		if (current == NULL)
+			return NULL;
+	}
+
+	return &current->table;
+}
+
+void ini_table_arr_add_to_table(ini_table_arr_t* table_arr, const char* table, char* key, char* value) {
+	if (table_arr->head == NULL)
+		return;
+
+	ini_table_t* _table = ini_table_arr_search_tables(*table_arr, table);
+	ini_table_push(_table, key, value);
+}
+
+void ini_table_arr_remove_from_table(ini_table_arr_t* table_arr, const char* table, const char* key) {
+	if (table_arr->head == NULL)
+		return;
+
+	ini_table_t* _table = ini_table_arr_search_tables(*table_arr, table);
+	ini_table_remove(_table, key);
+}
+
+bool valid_table_char(char c) {
+	return ((c >= 'a') && (c <= 'z')) ||
+		((c >= 'A') && (c <= 'Z')) ||
+		((c == '-') || (c == '_'));
+}
+
+bool valid_table_name(const char* name, size_t length) {
+	if (name == NULL)
+		return false;
+
+	for (size_t i = 0; i < length; i++) {
+		if (!valid_table_char(name[i]))
+			return false;
+	}
+
+	return true;
+}
+
+bool valid_key_char(char c) {
+	return ((c >= 'a') && (c <= 'z')) ||
+		((c >= 'A') && (c <= 'Z')) ||
+		((c == '-') || (c == '_'));
+}
+
+bool valid_key(const char* name, size_t length) {
+	if (name == NULL)
+		return false;
+
+	for (size_t i = 0; i < length; i++) {
+		if (!valid_key_char(name[i]))
+			return false;
+	}
+
+	return true;
+}
+
+bool is_whitespace(char c) {
+	return (c == ' ') || (c == '\n' || (c == '\t'));
+}
+
+/* TODO: bounds checking for like literally every nested loop... */
+bool ini_read(ini_t* ini, char* ini_path) {
+	ini->file_path = ini_path;
+	ini->table = ini_table_arr_new();
+
+	file_t ini_file = file_open(ini->file_path, READ);
+
+	char* ini_file_content;
+	size_t ini_file_content_length = file_read(ini_file, &ini_file_content);
+
+	file_close(ini_file);
+
+	if (ini_file_content_length == 0)
+		return false;
+
+	int error_occurred = 0;
+	for (size_t i = 0; i < ini_file_content_length; i++) {
+		// comments
+		if (ini_file_content[i] == ';') {
+			while (ini_file_content[i] != '\n') i++;
+			continue;
+		}
+		// table headers
+		else if (ini_file_content[i] == '[') {
+			i++;
+			size_t table_start = i;
+			while ((ini_file_content[i] != ']') &&
+					(!is_whitespace(ini_file_content[i]))) {
+				i++;
+			}
+
+			size_t table_length = i - table_start;
+			char* table_header = bounded_strdup(ini_file_content, table_start, table_length);
+			if (table_header == NULL) {
+				error_occurred = 1;
+				break;
+			}
+
+			if (!valid_table_name(table_header, table_length)) {
+				error_occurred = 1;
+				break;
+			}
+
+			ini_table_arr_add_table(&ini->table, ini_table_new(table_header));
+
+			continue;
+		}
+		// random whitespace
+		else if (is_whitespace(ini_file_content[i]))
+			continue;
+		// table key-value pairs
+		else {
+			// read the key
+			size_t key_start = i;
+			while ((!is_whitespace(ini_file_content[i])) &&
+					(ini_file_content[i] != '='))
+				i++;
+
+			size_t key_length = i - key_start;
+			char* key = bounded_strdup(ini_file_content, key_start, key_length);
+			if (key == NULL) {
+				error_occurred = 1;
+				break;
+			}
+
+			// skip whitespace
+			while (is_whitespace(ini_file_content[i])) i++;
+
+			// we expect '=', confirm valid formatting
+			if (ini_file_content[i] != '=') {
+				error_occurred = 1;
+				break;
+			}
+
+			// whitespace again
+			while (is_whitespace(ini_file_content[i])) i++;
+
+			// now we read the value
+			while (ini_file_content[i] != '"') i++;
+			i++;
+
+			size_t value_start = i;
+
+			while (ini_file_content[i] != '"' || ini_file_content[i - 1] == '\\') i++;
+
+			size_t value_length = i - value_start;
+			char* value = bounded_strdup(ini_file_content, value_start, value_length);
+
+			ini_table_t* table = ini_table_arr_get_last(ini->table);
+			ini_table_arr_add_to_table(&ini->table, table->name, key, value);
+
+			continue;
+		}
+	}
+
+	free(ini_file_content);
+
+	return error_occurred == 0;
+}
+
+void ini_add_table(ini_t* ini, char* table);
+
+void ini_remove_table(ini_t* ini, const char* table);
+
+void ini_add_kv_pair(ini_t* ini, const char* table, char* key, char* value);
+
+void ini_cleanup(ini_t* ini) {}
+
+bool ini_write(ini_t* ini) {}
 

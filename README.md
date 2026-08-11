@@ -19,7 +19,7 @@ Format:
 ```ini
 ; cute package manager settings
 [cute]
-version = 0
+version = "0"
 
 ; your project settings
 [project]
@@ -31,7 +31,7 @@ version = "1.0.0"
 package-a = "1.5.2"
 package-b = "2.1"
 
-; source URL overrides (neccessity for now)
+; source URL overrides
 [overide-source]
 package-a = "https://somedomain.ext/path/to/repo.git"
 ```

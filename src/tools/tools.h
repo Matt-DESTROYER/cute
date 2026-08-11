@@ -13,6 +13,9 @@
 #endif
 
 #include <stdbool.h>
+#include <stdlib.h>
+
+char* bounded_strdup(const char* string, size_t start, size_t end);
 
 char* format(const char* template_string, ...);
 

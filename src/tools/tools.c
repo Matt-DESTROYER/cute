@@ -34,6 +34,22 @@ char* format(const char* template_string, ...) {
 	return buffer;
 }
 
+// (End not inclusive)
+char* bounded_strdup(const char* string, size_t start, size_t end) {
+	if (string == NULL)
+		return NULL;
+
+	char* new_string = malloc((end - start + 1) * sizeof(string));
+	if (new_string == NULL)
+		return NULL;
+
+	for (size_t i = start; i < end; i++) {
+		new_string[i - start] = string[i];
+	}
+
+	return new_string;
+}
+
 bool fetch_package(const char *repo_url, const char *package_name, const char* version) {
 	char* package_folder = format("./.libraries/%s", package_name);
 	if (package_folder == NULL)
