@@ -253,6 +253,9 @@ void ini_table_arr_add_to_table(ini_table_arr_t* table_arr, const char* table, c
 		return;
 
 	ini_table_t* _table = ini_table_arr_search_tables(*table_arr, table);
+	if (_table == NULL)
+		return;
+
 	ini_table_push(_table, key, value);
 }
 
@@ -304,8 +307,9 @@ bool is_whitespace(char c) {
 	return c == ' ' || c == '\n' || c == '\t' || c == '\r';
 }
 
-void ini_add_table(ini_t* ini, char* table) {
-	ini_table_arr_add_table(&ini->table, ini_table_new(table));
+void ini_add_table(ini_t* ini, const char* table) {
+	char* _table = bounded_strdup(table, 0, strlen(table));
+	ini_table_arr_add_table(&ini->table, ini_table_new(_table));
 }
 
 void ini_remove_table(ini_t* ini, const char* table) {
@@ -316,13 +320,16 @@ ini_table_t* ini_search_table(ini_t ini, const char* table) {
 	return ini_table_arr_search_tables(ini.table, table);
 }
 
-void ini_add_kv_pair(ini_t* ini, const char* table, char* key, char* value) {
-	ini_table_arr_add_to_table(&ini->table, table, key, value);
+void ini_add_kv_pair(ini_t* ini, const char* table, const char* key, const char* value) {
+	char* _table = bounded_strdup(table, 0, strlen(table));
+	char* _key = bounded_strdup(key, 0, strlen(key));
+	char* _value = bounded_strdup(value, 0, strlen(value));
+	ini_table_arr_add_to_table(&ini->table, _table, _key, _value);
 }
 
-ini_t* ini_read(char* ini_path) {
+ini_t* ini_read(const char* ini_path) {
 	ini_t* ini = (ini_t*)malloc(sizeof(ini_t));
-	ini->file_path = ini_path;
+	ini->file_path = bounded_strdup(ini_path, 0, strlen(ini_path));
 	ini->succesfully_initialised = true;
 	ini->table = ini_table_arr_new();
 
@@ -387,6 +394,8 @@ ini_t* ini_read(char* ini_path) {
 		// random whitespace
 		else if (is_whitespace(ini_file_content[i]))
 			continue;
+		else if (ini_file_content[i] == '\0')
+			break;
 		// table key-value pairs
 		else {
 			// read the key
