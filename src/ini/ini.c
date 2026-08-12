@@ -71,6 +71,7 @@ void assoc_arr_push(assoc_arr_t* assoc_arr, char* key, char* value) {
 	if (assoc_arr->head == NULL) {
 		assoc_arr->head = item;
 		assoc_arr->tail = item;
+		assoc_arr->size++;
 		return;
 	}
 
@@ -190,6 +191,7 @@ void ini_table_arr_add_table(ini_table_arr_t* table_arr, ini_table_t table) {
 	if (table_arr->head == NULL) {
 		table_arr->head = item;
 		table_arr->tail = item;
+		table_arr->size++;
 		return;
 	}
 
@@ -299,7 +301,7 @@ bool valid_key(const char* name, size_t length) {
 }
 
 bool is_whitespace(char c) {
-	return c == ' ' || (c == '\n' || c == '\t');
+	return c == ' ' || c == '\n' || c == '\t' || c == '\r';
 }
 
 void ini_add_table(ini_t* ini, char* table) {
@@ -325,6 +327,10 @@ ini_t* ini_read(char* ini_path) {
 	ini->table = ini_table_arr_new();
 
 	file_t ini_file = file_open(ini->file_path, READ);
+	if (ini_file == NULL) {
+		ini->succesfully_initialised = false;
+		return ini;
+	}
 
 	char* ini_file_content;
 	size_t ini_file_content_length = file_read(ini_file, &ini_file_content);
@@ -463,7 +469,7 @@ ini_t* ini_read(char* ini_path) {
 			char* value = bounded_strdup(ini_file_content, value_start, value_length);
 
 			if (ini->table.size == 0) {
-				ini_table_arr_add_table(&ini->table, ini_table_new("global"));
+				ini_table_arr_add_table(&ini->table, ini_table_new(bounded_strdup("global", 0, 6)));
 			}
 
 			ini_table_t* table = ini_table_arr_get_last(ini->table);
@@ -479,6 +485,9 @@ ini_t* ini_read(char* ini_path) {
 }
 
 void ini_cleanup(ini_t* ini) {
+	if (ini == NULL)
+		return;
+
 	ini_table_item_t* current_table = ini->table.head;
 
 	while (current_table != NULL) {
@@ -493,14 +502,23 @@ void ini_cleanup(ini_t* ini) {
 			free(temp);
 		}
 
+		free(current_table->table.name);
+
 		ini_table_item_t* temp = current_table;
 		current_table = current_table->next;
 		free(temp);
 	}
+
+	free(ini);
 }
 
 bool ini_write(ini_t* ini) {
+	if (ini == NULL || ini->file_path == NULL)
+		return false;
+
 	file_t ini_file = file_open(ini->file_path, WRITE_BINARY);
+	if (ini_file == NULL)
+		return false;
 
 	ini_table_item_t* current_table = ini->table.head;
 
@@ -518,5 +536,9 @@ bool ini_write(ini_t* ini) {
 		fprintf(ini_file, "\n");
 		current_table = current_table->next;
 	}
+
+	file_close(ini_file);
+
+	return true;
 }
 

@@ -21,8 +21,16 @@ add_executable(cute ${SRC})
 target_link_libraries(cute PRIVATE tools file_io network ini)
 
 if(MSVC)
-	target_compile_options(cute PRIVATE /W4 /WX /O2)
+	target_compile_options(cute PRIVATE
+		/W4 /WX
+		$<$<CONFIG:Release>:/O2>
+		$<$<CONFIG:Debug>:/ZI;/Od>
+	)
 else()
-	target_compile_options(cute PRIVATE -Wall -Werror -O2)
+	target_compile_options(cute PRIVATE
+		-Wall -Werror
+		$<$<CONFIG:Release>:-O2>
+		$<$<CONFIG:Debug>:-g;-O0>
+	)
 endif()
 
