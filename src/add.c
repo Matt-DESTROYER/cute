@@ -1,4 +1,5 @@
 #include "tools.h"
+#include "ini.h"
 
 #include "add.h"
 
@@ -30,6 +31,12 @@ add_package_result_t add_package(int argc, char **argv) {
 	if (!res) {
 		return ADD_FETCH_FAILED;
 	}
+
+	ini_t* ini = ini_read("./Config.ini");
+
+	ini_add_kv_pair(ini, "dependencies", package_name, "");
+
+	ini_cleanup(ini);
 
 	return ADD_SUCCESS;
 }

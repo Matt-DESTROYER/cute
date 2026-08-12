@@ -47,6 +47,8 @@ typedef struct ini_table_arr {
 struct ini {
 	char* file_path;
 
+	bool succesfully_initialised;
+
 	ini_table_arr_t table;
 };
 
@@ -316,8 +318,10 @@ void ini_add_kv_pair(ini_t* ini, const char* table, char* key, char* value) {
 	ini_table_arr_add_to_table(&ini->table, table, key, value);
 }
 
-bool ini_read(ini_t* ini, char* ini_path) {
+ini_t* ini_read(char* ini_path) {
+	ini_t* ini = (ini_t*)malloc(sizeof(ini_t));
 	ini->file_path = ini_path;
+	ini->succesfully_initialised = true;
 	ini->table = ini_table_arr_new();
 
 	file_t ini_file = file_open(ini->file_path, READ);
@@ -327,10 +331,11 @@ bool ini_read(ini_t* ini, char* ini_path) {
 
 	file_close(ini_file);
 
-	if (ini_file_content_length == 0)
-		return false;
+	if (ini_file_content_length == 0) {
+		ini->succesfully_initialised = false;
+		return ini;
+	}
 
-	int error_occurred = 0;
 	for (size_t i = 0; i < ini_file_content_length; i++) {
 		// comments
 		if (ini_file_content[i] == ';') {
@@ -349,8 +354,8 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			}
 
 			if (i >= ini_file_content_length) {
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			size_t table_length = i - table_start;
@@ -358,15 +363,15 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			if (table_header == NULL) {
 				free(table_header);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			if (!valid_table_name(table_header, table_length)) {
 				free(table_header);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			ini_add_table(ini, table_header);
@@ -386,8 +391,8 @@ bool ini_read(ini_t* ini, char* ini_path) {
 				i++;
 
 			if (i >= ini_file_content_length) {
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			size_t key_length = i - key_start;
@@ -395,8 +400,8 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			if (key == NULL) {
 				free(key);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			// skip whitespace
@@ -406,16 +411,16 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			if (i >= ini_file_content_length) {
 				free(key);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			// we expect '=', confirm valid formatting
 			if (ini_file_content[i] != '=') {
 				free(key);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			// whitespace again
@@ -425,8 +430,8 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			if (i >= ini_file_content_length) {
 				free(key);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			// now we read the value
@@ -437,8 +442,8 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			if (i >= ini_file_content_length) {
 				free(key);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			size_t value_start = i;
@@ -450,8 +455,8 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			if (i >= ini_file_content_length) {
 				free(key);
 
-				error_occurred = 1;
-				break;
+				ini->succesfully_initialised = false;
+				return ini;
 			}
 
 			size_t value_length = i - value_start;
@@ -470,7 +475,7 @@ bool ini_read(ini_t* ini, char* ini_path) {
 
 	free(ini_file_content);
 
-	return error_occurred == 0;
+	return ini;
 }
 
 void ini_cleanup(ini_t* ini) {
