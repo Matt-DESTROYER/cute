@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 
 char* format(const char* template_string, ...) {
 	if (template_string == NULL)
@@ -39,13 +40,12 @@ char* bounded_strdup(const char* string, size_t start, size_t end) {
 	if (string == NULL)
 		return NULL;
 
-	char* new_string = malloc((end - start + 1) * sizeof(string));
+	size_t new_length = end - start;
+	char* new_string = malloc(sizeof(char) * (new_length + 1));
 	if (new_string == NULL)
 		return NULL;
 
-	for (size_t i = start; i < end; i++) {
-		new_string[i - start] = string[i];
-	}
+	memcpy(new_string, string + start, sizeof(char) * new_length);
 
 	return new_string;
 }

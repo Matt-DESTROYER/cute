@@ -2,6 +2,7 @@
 #include "file_io.h"
 #include "ini.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -197,14 +198,14 @@ void ini_table_arr_add_table(ini_table_arr_t* table_arr, ini_table_t table) {
 	table_arr->size++;
 }
 
-void ini_table_arr_remove_table(ini_table_arr_t* table_arr, const char* key) {
+void ini_table_arr_remove_table(ini_table_arr_t* table_arr, const char* table) {
 	if (table_arr->head == NULL)
 		return;
 
 	ini_table_item_t* current = table_arr->head;
 
 	while (current != NULL &&
-			strcmp(current->table.name, key) != 0) {
+			strcmp(current->table.name, table) != 0) {
 		current = current->next;
 	}
 
@@ -226,14 +227,14 @@ void ini_table_arr_remove_table(ini_table_arr_t* table_arr, const char* key) {
 	free(current);
 }
 
-ini_table_t* ini_table_arr_search_tables(ini_table_arr_t table_arr, const char* key) {
+ini_table_t* ini_table_arr_search_tables(ini_table_arr_t table_arr, const char* table) {
 	if (table_arr.head == NULL)
 		return NULL;
 
 	ini_table_item_t* current = table_arr.head;
 
 	while (current != NULL &&
-			strcmp(current->table.name, key) != 0) {
+			strcmp(current->table.name, table) != 0) {
 		current = current->next;
 	}
 
@@ -299,7 +300,22 @@ bool is_whitespace(char c) {
 	return c == ' ' || (c == '\n' || c == '\t');
 }
 
-/* TODO: bounds checking for like literally every nested loop... */
+void ini_add_table(ini_t* ini, char* table) {
+	ini_table_arr_add_table(&ini->table, ini_table_new(table));
+}
+
+void ini_remove_table(ini_t* ini, const char* table) {
+	ini_table_arr_remove_table(&ini->table, table);
+}
+
+ini_table_t* ini_search_table(ini_t ini, const char* table) {
+	return ini_table_arr_search_tables(ini.table, table);
+}
+
+void ini_add_kv_pair(ini_t* ini, const char* table, char* key, char* value) {
+	ini_table_arr_add_to_table(&ini->table, table, key, value);
+}
+
 bool ini_read(ini_t* ini, char* ini_path) {
 	ini->file_path = ini_path;
 	ini->table = ini_table_arr_new();
@@ -353,7 +369,7 @@ bool ini_read(ini_t* ini, char* ini_path) {
 				break;
 			}
 
-			ini_table_arr_add_table(&ini->table, ini_table_new(table_header));
+			ini_add_table(ini, table_header);
 
 			continue;
 		}
@@ -403,7 +419,7 @@ bool ini_read(ini_t* ini, char* ini_path) {
 			}
 
 			// whitespace again
-			while (i < ini_file_content_length && 
+			while (i < ini_file_content_length &&
 					is_whitespace(ini_file_content[i])) i++;
 
 			if (i >= ini_file_content_length) {
@@ -457,13 +473,26 @@ bool ini_read(ini_t* ini, char* ini_path) {
 	return error_occurred == 0;
 }
 
-void ini_add_table(ini_t* ini, char* table);
-
-void ini_remove_table(ini_t* ini, const char* table);
-
-void ini_add_kv_pair(ini_t* ini, const char* table, char* key, char* value);
-
 void ini_cleanup(ini_t* ini) {}
 
-bool ini_write(ini_t* ini) {}
+bool ini_write(ini_t* ini) {
+	file_t ini_file = file_open(ini->file_path, WRITE_BINARY);
+
+	ini_table_item_t* current_table = ini->table.head;
+
+	while (current_table != NULL) {
+		fprintf(ini_file, "[%s]\n", current_table->table.name);
+
+		assoc_arr_item_t* kv_pair = current_table->table.table.head;
+
+		while (kv_pair != NULL) {
+			fprintf(ini_file, "%s = \"%s\"\n", kv_pair->key, kv_pair->value);
+
+			kv_pair = kv_pair->next;
+		}
+
+		fprintf(ini_file, "\n");
+		current_table = current_table->next;
+	}
+}
 
