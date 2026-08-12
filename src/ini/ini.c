@@ -473,7 +473,26 @@ bool ini_read(ini_t* ini, char* ini_path) {
 	return error_occurred == 0;
 }
 
-void ini_cleanup(ini_t* ini) {}
+void ini_cleanup(ini_t* ini) {
+	ini_table_item_t* current_table = ini->table.head;
+
+	while (current_table != NULL) {
+		assoc_arr_item_t* kv_pair = current_table->table.table.head;
+
+		while (kv_pair != NULL) {
+			free(kv_pair->key);
+			free(kv_pair->value);
+
+			assoc_arr_item_t* temp = kv_pair;
+			kv_pair = kv_pair->next;
+			free(temp);
+		}
+
+		ini_table_item_t* temp = current_table;
+		current_table = current_table->next;
+		free(temp);
+	}
+}
 
 bool ini_write(ini_t* ini) {
 	file_t ini_file = file_open(ini->file_path, WRITE_BINARY);
