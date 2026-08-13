@@ -37,8 +37,17 @@ char* format(const char* template_string, ...) {
 
 // (End not inclusive)
 char* bounded_strdup(const char* string, size_t start, size_t end) {
-	if (string == NULL)
+	if (string == NULL || start == end)
 		return NULL;
+
+	int reverse = 0;
+	if (start > end) {
+		reverse = 1;
+
+		size_t temp = start;
+		start = end;
+		end = temp;
+	}
 
 	size_t new_length = end - start;
 	char* new_string = malloc(sizeof(char) * (new_length + 1));
@@ -46,6 +55,16 @@ char* bounded_strdup(const char* string, size_t start, size_t end) {
 		return NULL;
 
 	memcpy(new_string, string + start, sizeof(char) * new_length);
+	new_string[new_length] = '\0';
+
+	if (reverse == 1) {
+		for (size_t i = 0; i < new_length / 2; i++) {
+			size_t end_idx = new_length - i - 1;
+			char temp = new_string[i];
+			new_string[i] = new_string[end_idx];
+			new_string[end_idx] = temp;
+		}
+	}
 
 	return new_string;
 }

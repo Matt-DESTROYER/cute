@@ -372,7 +372,8 @@ ini_t* ini_read(const char* ini_path) {
 			}
 
 			size_t table_length = i - table_start;
-			char* table_header = bounded_strdup(ini_file_content, table_start, table_length);
+
+			char* table_header = bounded_strdup(ini_file_content, table_start, i);
 			if (table_header == NULL) {
 				free(table_header);
 
@@ -410,8 +411,7 @@ ini_t* ini_read(const char* ini_path) {
 				return ini;
 			}
 
-			size_t key_length = i - key_start;
-			char* key = bounded_strdup(ini_file_content, key_start, key_length);
+			char* key = bounded_strdup(ini_file_content, key_start, i);
 			if (key == NULL) {
 				free(key);
 
@@ -474,8 +474,7 @@ ini_t* ini_read(const char* ini_path) {
 				return ini;
 			}
 
-			size_t value_length = i - value_start;
-			char* value = bounded_strdup(ini_file_content, value_start, value_length);
+			char* value = bounded_strdup(ini_file_content, value_start, i);
 
 			if (ini->table.size == 0) {
 				ini_table_arr_add_table(&ini->table, ini_table_new(bounded_strdup("global", 0, 6)));
@@ -537,7 +536,10 @@ bool ini_write(ini_t* ini) {
 		assoc_arr_item_t* kv_pair = current_table->table.table.head;
 
 		while (kv_pair != NULL) {
-			fprintf(ini_file, "%s = \"%s\"\n", kv_pair->key, kv_pair->value);
+			if (kv_pair->value == NULL)
+				fprintf(ini_file, "%s = \"\"\n", kv_pair->key);
+			else
+				fprintf(ini_file, "%s = \"%s\"\n", kv_pair->key, kv_pair->value);
 
 			kv_pair = kv_pair->next;
 		}
