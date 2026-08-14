@@ -85,18 +85,15 @@ bool fetch_package(const char *repo_url, const char *package_name, const char* v
 	} else {
 		command = format("git clone --depth 1 --branch v%s -q \"%s\" \"%s\"", repo_url, package_folder, version);
 	}
+
 	free(package_folder);
-	if (command == NULL) {
+	if (command == NULL)
 		return false;
-	}
 
 	int exit_code = system(command);
 
 	free(command);
 
-	if (exit_code != 0) {
-		return false;
-	}
-	return true;
+	return exit_code == 0;
 }
 
