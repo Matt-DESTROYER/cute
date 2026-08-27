@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             c_compiler: gcc
             asset_name: linux-x64
           - os: ubuntu-24.04-arm
@@ -27,7 +27,7 @@ jobs:
           - os: macos-latest
             c_compiler: clang
             asset_name: macos-arm64
-          - os: macos-13
+          - os: macos-14
             c_compiler: clang
             asset_name: macos-x64
           - os: windows-latest
