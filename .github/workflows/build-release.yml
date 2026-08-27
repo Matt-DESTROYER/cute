@@ -50,7 +50,7 @@ jobs:
         CC: ${{ matrix.c_compiler }}
       run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
-          cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
+          cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
         else
           cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release
         fi
