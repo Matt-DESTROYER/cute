@@ -1,10 +1,35 @@
 #include "tools.h"
 #include "file_io.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #if __WINDOWS
 	#include <windows.h>
+	#include <direct.h>
+	#include <io.h>
+
+	#define ACCESS _access
+	#define GETCWD _getcwd
+
+	#define F_OK 0
+	#ifndef PATH_MAX
+		#define PATH_MAX MAX_PATH
+	#endif
+
+	#define DIR_SEP '\\'
+	#define DIR_SEP_STR "\\"
 #else
 	#include <sys/stat.h>
+	#include <unistd.h>
+	#include <limits.h>
+
+	#define ACCESS access
+	#define GETCWD getcwd
+
+	#define DIR_SEP '/'
+	#define DIR_SEP_STR "/"
 #endif
 
 bool file_exists(const char* file) {
@@ -174,5 +199,38 @@ void file_write(file_t file, const char* buffer, size_t size) {
 		return;
 
 	fwrite(buffer, sizeof(char), size, file);
+}
+
+char* file_root_by_file(const char* file) {
+	if (file == NULL)
+		return NULL;
+
+	char current_dir[PATH_MAX];
+
+	if (GETCWD(current_dir, sizeof(current_dir)) == NULL)
+		return NULL;
+
+	while (true) {
+		char file_path[PATH_MAX];
+		snprintf(file_path, sizeof(file_path), "%s" DIR_SEP_STR "%s", current_dir, file);
+
+		if (ACCESS(file_path, F_OK) == 0)
+			return bounded_strdup(current_dir, 0, strlen(current_dir));
+
+		if (strcmp(current_dir, "/") == 0)
+			break;
+
+		char* last_slash = strrchr(current_dir, DIR_SEP);
+		if (last_slash == NULL)
+			break;
+
+		// last_slash == current_dir would indicate POSIX root
+		if (last_slash == current_dir)
+			strcpy(current_dir, "/");
+		else
+			*last_slash = '\0';
+	}
+
+	return NULL;
 }
 

@@ -19,6 +19,8 @@ char* bounded_strdup(const char* string, size_t start, size_t end);
 
 char* format(const char* template_string, ...);
 
+void flatten_directory_name(char* buffer);
+
 bool fetch_package(const char* repo_url, const char* package_name, const char* version);
 
 #endif

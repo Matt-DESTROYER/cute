@@ -34,5 +34,7 @@ void file_close(file_t file);
 size_t file_read(file_t file, char** out);
 void file_write(file_t file, const char* buffer, size_t size);
 
+char* file_root_by_file(const char* file);
+
 #endif
 

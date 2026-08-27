@@ -15,6 +15,8 @@ set(SRC
 	src/main.c
 	src/new.c
 	src/add.c
+	src/clean.c
+	src/build.c
 )
 add_executable(cute ${SRC})
 

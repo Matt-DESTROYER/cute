@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 const char* CUTE_INI = "; cute package manager settings\n\
 [cute]\n\
@@ -13,6 +14,7 @@ version = \"0\"\n\
 [project]\n\
 name = \"%s\"\n\
 version = \"0.1.0\"\n\
+type = \"%s\"\n\
 \n\
 ; your project dependencies\n\
 [dependencies]\n\
@@ -53,16 +55,33 @@ endif()\n\
 \n\
 file(GLOB_RECURSE SRC \"src/*.c\")\n\
 \n\
+if(MSVC)\n\
+	target_compile_options(${PROJECT_NAME} PRIVATE\n\
+	/W4 /WX\n\
+	$<$<CONFIG:Release>:/O2>\n\
+	$<$<CONFIG:Debug>:/ZI;/Od>\n\
+else()\n\
+	-Wall -Werror\n\
+	$<$<CONFIG:Release>:-O2>\n\
+	$<$<CONFIG:Debug>:-g;-O0>\n\
+	\n\
+endif\n\
+\n\
 if(IS_ROOT_PROJECT)\n\
-	add_executable(${PROJECT_NAME} ${SRC})\n\
+	if(EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/src/main.c\")\n\
+		add_executable(${PROJECT_NAME} ${SRC})\n\
+	else()\n\
+		add_library(${PROJECT_NAME} STATIC ${SRC})\n\
+	endif()\n\
 \n\
 	if(PACKAGE_TARGETS)\n\
 		target_link_libraries(${PROJECT_NAME} PRIVATE ${PACKAGE_TARGETS})\n\
 	endif()\n\
 else()\n\
-	add_library(${PROJECT_NAME} STATIC ${SRC})\n\
+	get_filename_component(DEP_TARGET_NAME \"${CMAKE_CURRENT_SOURCE_DIR}\" NAME)\n\
+	add_library(${DEP_TARGET_NAME} STATIC ${SRC})\n\
 \n\
-	target_include_directories(${PROJECT_NAME} PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/src\")\n\
+	target_include_directories(${DEP_TARGET_NAME} PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/src\")\n\
 endif()\n\
 \n\
 ";
@@ -79,6 +98,7 @@ int main(int argc, char* argv[]) {\n\
 
 new_project_result_t new_project(int argc, char* argv[]) {
 	char* project_name = NULL;
+	bool is_library = false;
 	for (int i = 2; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			if (project_name != NULL)
@@ -86,6 +106,8 @@ new_project_result_t new_project(int argc, char* argv[]) {
 
 			project_name = argv[i];
 			continue;
+		} else if (strcmp(argv[i], "--lib") == 0) {
+			is_library = true;
 		}
 	}
 
@@ -98,7 +120,11 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	char* cmakelists_txt_path = format("%s/CMakeLists.txt", directory);
 
 	char* src_dir = format("%s/src", directory);
-	char* main_path = format("%s/main.c", src_dir);
+	char* main_path;
+	if (is_library)
+		main_path = format("%s/lib.c", src_dir);
+	else
+		main_path = format("%s/main.c", src_dir);
 
 	char* include_dir = format("%s/.includes", directory);
 	char* libraries_dir = format("%s/.libraries", directory);
@@ -109,11 +135,11 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	directory_create(project_name);
 
 	file_t ini_file = file_open(ini_path, WRITE_BINARY);
-	fprintf(ini_file, CUTE_INI, project_name);
+	fprintf(ini_file, CUTE_INI, project_name, is_library ? "library" : "executable");
 	file_close(ini_file);
 
 	file_t lock_file = file_open(lock_path, WRITE_BINARY);
-	fprintf(lock_file, CUTE_LOCK_INI);
+	file_write(lock_file, CUTE_LOCK_INI, strlen(CUTE_LOCK_INI));
 	file_close(lock_file);
 
 	file_t cmakelists_txt_file = file_open(cmakelists_txt_path, WRITE_BINARY);
@@ -122,7 +148,7 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	directory_create(src_dir);
 
 	file_t main_file = file_open(main_path, WRITE_BINARY);
-	fprintf(main_file, MAIN_C);
+	file_write(main_file, MAIN_C, strlen(MAIN_C));
 	file_close(main_file);
 
 	free(directory);

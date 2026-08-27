@@ -69,8 +69,24 @@ char* bounded_strdup(const char* string, size_t start, size_t end) {
 	return new_string;
 }
 
+void flatten_directory_name(char* buffer) {
+	size_t i = 0;
+	while (buffer[i] != '\0') {
+		if (buffer[i] == '/')
+			buffer[i] = '_';
+
+		i++;
+	}
+}
+
 bool fetch_package(const char *repo_url, const char *package_name, const char* version) {
-	char* package_folder = format("./.libraries/%s", package_name);
+	char* _package_name = bounded_strdup(package_name, 0, strlen(package_name));
+	if (_package_name == NULL) {
+		return false;
+	}
+	flatten_directory_name(_package_name);
+	char* package_folder = format("./.libraries/%s", _package_name);
+	free(_package_name);
 	if (package_folder == NULL)
 		return false;
 
