@@ -19,7 +19,7 @@ Format:
 ```ini
 ; cute package manager settings
 [cute]
-version = "0"
+version = "0.2"
 
 ; your project settings
 [project]

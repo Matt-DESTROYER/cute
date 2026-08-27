@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 int main(int argc, char* argv[]) {
 	if (argc == 1) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 		// TODO
 		printf("Note yet implemented\n");
 	} else if (strcmp(argv[1], "clean") == 0) {
-		clean(argc, argv);
+		clean();
 	} else if (strcmp(argv[1], "build") == 0) {
 		build(argc, argv);
 	} else {
