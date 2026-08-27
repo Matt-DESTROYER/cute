@@ -37,6 +37,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install Dependencies (Linux)
+      if: runner.os ==  'Linux'
+      run: sudo apt update && sudo apt install -y libcurl4-openssl-dev
+
     - name: Configure CMake
       env:
         CC: ${{ matrix.c_compiler }}
