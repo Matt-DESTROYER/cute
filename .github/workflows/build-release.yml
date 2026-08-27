@@ -46,6 +46,7 @@ jobs:
       run: vcpkg install curl:x64-windows
 
     - name: Configure CMake
+      shell: bash
       env:
         CC: ${{ matrix.c_compiler }}
       run: |
@@ -56,6 +57,7 @@ jobs:
         fi
 
     - name: Build
+      shell: bash
       run: cmake --build "${{ github.workspace }}/build" --config Release
 
     - name: Prepare artifact directory
