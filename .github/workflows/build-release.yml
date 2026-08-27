@@ -1,0 +1,90 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            c_compiler: gcc
+            asset_name: linux-x64
+          - os: ubuntu-24.04-arm
+            c_compiler: gcc
+            asset_name: linux-arm64
+          - os: macos-latest
+            c_compiler: clang
+            asset_name: macos-arm64
+          - os: macos-13
+            c_compiler: clang
+            asset_name: macos-x64
+          - os: windows-latest
+            c_compiler: cl
+            asset_name: windows-x64
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure CMake
+      env:
+        CC: ${{ matrix.c_compiler }}
+      run: cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build "${{ github.workspace }}/build" --config Release
+
+    - name: Prepare artifact directory
+      shell: bash
+      run: |
+        mkdir -p artifact
+        if [ -f "${{ github.workspace }}/build/Release/cute.exe" ]; then
+          cp "${{ github.workspace }}/build/Release/cute.exe" artifact/cute.exe
+        elif [ -f "${{ github.workspace }}/build/cute" ]; then
+          cp "${{ github.workspace }}/build/cute" artifact/cute
+        else
+          echo "Error: Executable not found!"
+          exit 1
+        fi
+
+    - name: Smoke test
+      shell: bash
+      run: |
+        if [ -f "artifact/cute.exe" ]; then
+          ./artifact/cute.exe version
+        elif [ -f "artifact/cute" ]; then
+          chmod +x ./artifact/cute
+          ./artifact/cute version
+        fi
+
+    - name: Attest build provenance
+      uses: actions/attest-build-provenance@v3
+      with:
+        subject-path: "artifact/*"
+
+    - name: Create release archive
+      shell: bash
+      run: |
+        cd artifact
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          7z a ../cute-${{ matrix.asset_name }}.zip *
+        else
+          tar -czf ../cute-${{ matrix.asset_name }}.tar.gz *
+        fi
+
+    - name: Upload artifact to release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: cute-${{ matrix.asset_name }}.*
+        generate_release_notes: true
