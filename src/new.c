@@ -26,11 +26,16 @@ const char* CUTE_LOCK_INI = "; THIS FILE IS AUTO-GENERATED\n\
 ";
 
 const char* CMAKELISTS_TXT = "cmake_minimum_required(VERSION 3.10)\n\
+\n\
 project(%s C)\n\
 \n\
 set(CMAKE_C_STANDARD 11)\n\
 set(CMAKE_C_STANDARD_REQUIRED ON)\n\
 set(CMAKE_C_EXTENSIONS OFF)\n\
+\n\
+file(GLOB_RECURSE SRC\n\
+	\"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c\"\n\
+)\n\
 \n\
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)\n\
 	set(IS_ROOT_PROJECT TRUE)\n\
@@ -39,54 +44,57 @@ else()\n\
 endif()\n\
 \n\
 if(IS_ROOT_PROJECT)\n\
-	file(GLOB installed_packages LIST_DIRECTORIES true \"${CMAKE_CURRENT_SOURCE_DIR}/.libraries/*\")\n\
+	file(GLOB installed_packages LIST_DIRECTORIES true\n\
+		\"${CMAKE_CURRENT_SOURCE_DIR}/.libraries/*\"\n\
+	)\n\
 \n\
 	set(PACKAGE_TARGETS \"\")\n\
 \n\
 	foreach(package_dir ${installed_packages})\n\
-		if(IS_DIRECTORY \"${package_dir}\" AND EXISTS \"${package_dir}/CMakeLists.txt\")\n\
+		if(IS_DIRECTORY \"${package_dir}\")\n\
 			add_subdirectory(\"${package_dir}\")\n\
 \n\
 			get_filename_component(target_name \"${package_dir}\" NAME)\n\
-\n\
 			list(APPEND PACKAGE_TARGETS ${target_name})\n\
 		endif()\n\
 	endforeach()\n\
-endif()\n\
 \n\
-file(GLOB_RECURSE SRC \"src/*.c\")\n\
-\n\
-if(IS_ROOT_PROJECT)\n\
 	if(EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/src/main.c\")\n\
 		add_executable(${PROJECT_NAME} ${SRC})\n\
 	else()\n\
 		add_library(${PROJECT_NAME} STATIC ${SRC})\n\
 	endif()\n\
 \n\
+	set(CUTE_TARGET ${PROJECT_NAME})\n\
+\n\
 	if(PACKAGE_TARGETS)\n\
-		target_link_libraries(${PROJECT_NAME} PRIVATE ${PACKAGE_TARGETS})\n\
+		target_link_libraries(${CUTE_TARGET} PRIVATE ${PACKAGE_TARGETS})\n\
 	endif()\n\
 else()\n\
-	get_filename_component(DEP_TARGET_NAME \"${CMAKE_CURRENT_SOURCE_DIR}\" NAME)\n\
-	add_library(${DEP_TARGET_NAME} STATIC ${SRC})\n\
+	get_filename_component(CUTE_TARGET \"${CMAKE_CURRENT_SOURCE_DIR}\" NAME)\n\
 \n\
-	target_include_directories(${DEP_TARGET_NAME} PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/src\")\n\
+	add_library(${CUTE_TARGET} STATIC ${SRC})\n\
+\n\
+	target_include_directories(${CUTE_TARGET} PUBLIC\n\
+		\"${CMAKE_CURRENT_SOURCE_DIR}/src\"\n\
+	)\n\
 endif()\n\
 \n\
 if(MSVC)\n\
-	target_compile_options(${PROJECT_NAME} PRIVATE\n\
-		/W4 /WX\n\
+	target_compile_options(${CUTE_TARGET} PRIVATE\n\
+		/W4\n\
+		/WX\n\
 		$<$<CONFIG:Release>:/O2>\n\
 		$<$<CONFIG:Debug>:/ZI;/Od>\n\
 	)\n\
 else()\n\
-	target_compile_options(${PROJECT_NAME} PRIVATE\n\
-		-Wall -Werror\n\
+	target_compile_options(${CUTE_TARGET} PRIVATE\n\
+		-Wall\n\
+		-Werror\n\
 		$<$<CONFIG:Release>:-O2>\n\
 		$<$<CONFIG:Debug>:-g;-O0>\n\
 	)\n\
 endif()\n\
-\n\
 ";
 
 const char* MAIN_C = "#include <stdlib.h>\n\
