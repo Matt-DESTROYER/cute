@@ -124,7 +124,8 @@ new_project_result_t new_project(int argc, char* argv[]) {
 
 			project_name = argv[i];
 			continue;
-		} else if (strcmp(argv[i], "--lib") == 0) {
+		} else if (strcmp(argv[i], "--lib") == 0
+				|| strcmp(argv[i], "-l") == 0) {
 			is_library = true;
 		}
 	}

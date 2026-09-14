@@ -2,8 +2,42 @@
 A (somewhat opinionated) mini package manager for C!
 
 ## Dependencies
- - libcurl (planned to remove at some point, and just have a small TLS library/pure sockets)
  - git
+ - cmake
+
+## Installation
+Clone the repo and run the relevant install script.
+
+On Windows:
+```pwsh
+.\install.ps1
+```
+
+On macOS and Linux:
+```sh
+./install.sh
+```
+
+## Usage
+Create a new package using `cute new` supply a name, and optionally specify that the package is a library.
+```sh
+cute new my-package
+# OR
+cute new my-library --lib
+```
+
+Then to add any package you wish, use `cute add`.
+```sh
+cute add GitHubUser/CutePackageRepo
+```
+
+> Note: cute expects packages to be Git repositories.
+> By default it will look for the package on GitHub.
+> Not yet supported, but you can specify a URL and it will happily clone any valid Git repository (using Git under the hood).
+
+Once a package is added, it's ready to use.
+
+When you're ready, run `cute build` to build your project!
 
 ## Planned functionality
  - Initialise a C program (similar to `cargo new`)
