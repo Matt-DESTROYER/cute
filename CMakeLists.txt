@@ -35,3 +35,9 @@ else()
 	)
 endif()
 
+include(GNUInstallDirs)
+
+install(TARGETS cute
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
