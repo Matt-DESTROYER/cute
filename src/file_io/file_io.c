@@ -210,9 +210,9 @@ char* file_root_by_file(const char* file) {
 	if (GETCWD(current_dir, sizeof(current_dir)) == NULL)
 		return NULL;
 
+	char file_path[PATH_MAX];
 	while (true) {
-		char file_path[PATH_MAX];
-		snprintf(file_path, sizeof(file_path), "%s" DIR_SEP_STR "%s", current_dir, file);
+		snprintf(file_path, int_min(sizeof(file_path), PATH_MAX), "%s" DIR_SEP_STR "%s", current_dir, file);
 
 		if (ACCESS(file_path, F_OK) == 0)
 			return bounded_strdup(current_dir, 0, strlen(current_dir));

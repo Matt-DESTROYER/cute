@@ -79,13 +79,13 @@ void flatten_directory_name(char* buffer) {
 	}
 }
 
-bool fetch_package(const char *repo_url, const char *package_name, const char* version) {
+bool fetch_package(const char* repo_url, const char* package_name, const char* location, const char* version) {
 	char* _package_name = bounded_strdup(package_name, 0, strlen(package_name));
 	if (_package_name == NULL) {
 		return false;
 	}
 	flatten_directory_name(_package_name);
-	char* package_folder = format("./.libraries/%s", _package_name);
+	char* package_folder = format("%s/%s", location, _package_name);
 	free(_package_name);
 	if (package_folder == NULL)
 		return false;
@@ -111,5 +111,11 @@ bool fetch_package(const char *repo_url, const char *package_name, const char* v
 	free(command);
 
 	return exit_code == 0;
+}
+
+int int_min(int x, int y) {
+	if (x < y)
+		return x;
+	return y;
 }
 

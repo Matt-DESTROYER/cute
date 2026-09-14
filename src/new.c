@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 const char* CUTE_INI = "; cute package manager settings\n\
 [cute]\n\
@@ -55,18 +56,6 @@ endif()\n\
 \n\
 file(GLOB_RECURSE SRC \"src/*.c\")\n\
 \n\
-if(MSVC)\n\
-	target_compile_options(${PROJECT_NAME} PRIVATE\n\
-	/W4 /WX\n\
-	$<$<CONFIG:Release>:/O2>\n\
-	$<$<CONFIG:Debug>:/ZI;/Od>\n\
-else()\n\
-	-Wall -Werror\n\
-	$<$<CONFIG:Release>:-O2>\n\
-	$<$<CONFIG:Debug>:-g;-O0>\n\
-	\n\
-endif\n\
-\n\
 if(IS_ROOT_PROJECT)\n\
 	if(EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/src/main.c\")\n\
 		add_executable(${PROJECT_NAME} ${SRC})\n\
@@ -84,6 +73,20 @@ else()\n\
 	target_include_directories(${DEP_TARGET_NAME} PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/src\")\n\
 endif()\n\
 \n\
+if(MSVC)\n\
+	target_compile_options(${PROJECT_NAME} PRIVATE\n\
+		/W4 /WX\n\
+		$<$<CONFIG:Release>:/O2>\n\
+		$<$<CONFIG:Debug>:/ZI;/Od>\n\
+	)\n\
+else()\n\
+	target_compile_options(${PROJECT_NAME} PRIVATE\n\
+		-Wall -Werror\n\
+		$<$<CONFIG:Release>:-O2>\n\
+		$<$<CONFIG:Debug>:-g;-O0>\n\
+	)\n\
+endif()\n\
+\n\
 ";
 
 const char* MAIN_C = "#include <stdlib.h>\n\
@@ -94,6 +97,13 @@ int main(int argc, char* argv[]) {\n\
 \n\
 	return EXIT_SUCCESS;\n\
 }\n\
+";
+
+const char* HEADER = "#ifndef %s_H\n\
+#define %s_h\n\
+\n\
+\n\
+#endif\n\
 ";
 
 new_project_result_t new_project(int argc, char* argv[]) {
@@ -122,7 +132,7 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	char* src_dir = format("%s/src", directory);
 	char* main_path;
 	if (is_library)
-		main_path = format("%s/lib.c", src_dir);
+		main_path = format("%s/%s.c", src_dir, project_name);
 	else
 		main_path = format("%s/main.c", src_dir);
 
@@ -150,6 +160,26 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	file_t main_file = file_open(main_path, WRITE_BINARY);
 	file_write(main_file, MAIN_C, strlen(MAIN_C));
 	file_close(main_file);
+
+	if (is_library) {
+		char* capitalised_project_name = bounded_strdup(project_name, 0, strlen(project_name));
+		for (size_t i = 0; i < strlen(capitalised_project_name); i++) {
+			capitalised_project_name[i] = toupper(capitalised_project_name[i]);
+		}
+
+		char* header_path = format("%s/%s.h", src_dir, project_name);
+		char* header_txt = format(HEADER, capitalised_project_name, capitalised_project_name);
+		free(capitalised_project_name);
+
+		file_t header_file = file_open(header_path, WRITE_BINARY);
+		free(header_path);
+
+		if (header_file != NULL)
+			file_write(header_file, header_txt, strlen(HEADER));
+		file_close(header_file);
+
+		free(header_txt);
+	}
 
 	free(directory);
 	free(ini_path);

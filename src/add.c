@@ -1,6 +1,7 @@
 #include "ini/ini.h"
 #include "tools.h"
 #include "ini.h"
+#include "file_io.h"
 
 #include "add.h"
 
@@ -8,6 +9,12 @@
 #include <stdbool.h>
 
 add_package_result_t add_package(int argc, char **argv) {
+	char* project_root = file_root_by_file("Cute.ini");
+	if (project_root == NULL) {
+		printf("Not a Cute project...\n");
+		return ADD_NOT_CUTE_PROJECT;
+	}
+
 	char* package_name = NULL;
 	char* package_version = NULL;
 
@@ -29,10 +36,13 @@ add_package_result_t add_package(int argc, char **argv) {
 		return ADD_NO_PACKAGE_NAME;
 
 	char* package_url = format("https://github.com/%s.git", package_name);
+	char* package_location = format("%s/.libraries/", project_root);
 
-	bool res = fetch_package(package_url, package_name, package_version);
+	bool res = fetch_package(package_url, package_name, package_location, package_version);
 
+	free(package_location);
 	free(package_url);
+	free(project_root);
 
 	if (!res)
 		return ADD_FETCH_FAILED;

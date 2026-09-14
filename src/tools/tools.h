@@ -21,7 +21,9 @@ char* format(const char* template_string, ...);
 
 void flatten_directory_name(char* buffer);
 
-bool fetch_package(const char* repo_url, const char* package_name, const char* version);
+bool fetch_package(const char* repo_url, const char* package_name, const char* location, const char* version);
+
+int int_min(int x, int y);
 
 #endif
 
