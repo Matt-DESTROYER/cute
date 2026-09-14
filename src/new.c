@@ -172,7 +172,7 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	if (is_library) {
 		char* capitalised_project_name = bounded_strdup(project_name, 0, strlen(project_name));
 		for (size_t i = 0; i < strlen(capitalised_project_name); i++) {
-			capitalised_project_name[i] = toupper(capitalised_project_name[i]);
+			capitalised_project_name[i] = toupper((char)capitalised_project_name[i]);
 		}
 
 		char* header_path = format("%s/%s.h", src_dir, project_name);
