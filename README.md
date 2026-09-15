@@ -75,10 +75,10 @@ int main(int argc, char* argv[]) {
 
         return EXIT_SUCCESS;
 }
-cute add Matt-DESTROYER/file-io
-cute build
-./build/hello_world
-cat hello.txt
+$ cute add Matt-DESTROYER/file-io
+$ cute build
+$ ./build/hello_world
+$ cat hello.txt
 Hello, world!
 ```
 
