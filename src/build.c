@@ -23,7 +23,6 @@ void build(int argc, char* argv[]) {
 		printf("Not a Cute project...\n");
 		return;
 	}
-	printf("project_root: %s\n", project_root);
 
 	int exit_code;
 
