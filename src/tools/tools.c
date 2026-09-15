@@ -12,7 +12,7 @@
 	#include <spawn.h>
 	#include <sys/wait.h>
 
-	extern char* environ;
+	extern char** environ;
 #endif
 
 char* format(const char* template_string, ...) {
@@ -88,7 +88,7 @@ void flatten_directory_name(char* buffer) {
 	}
 }
 
-bool fetch_package(const char* repo_url, const char* package_name, const char* location, const char* version) {
+bool fetch_package(char* repo_url, char* package_name, char* location, char* version) {
 	char* _package_name = bounded_strdup(package_name, 0, strlen(package_name));
 	if (_package_name == NULL) {
 		return false;
@@ -159,23 +159,21 @@ bool fetch_package(const char* repo_url, const char* package_name, const char* l
 		if (posix_spawnp(&pid, "git", NULL, NULL, argv, environ) == 0) {
 			waitpid(pid, &status, 0);
 			if (WIFEXITED(status)) {
-				exit_code = WEXITSTATUS(status);
-				return exit_code;
+				return WEXITSTATUS(status) == 0;
 			}
 		}
 	} else {
 		char* branch = format("v%s", version);
 
 		char* argv[] = {
-			"git", "clone", "--depth", "1", "--branch", branch, "-q"
+			"git", "clone", "--depth", "1", "--branch", branch, "-q",
 			repo_url, package_folder, NULL
 		};
 
 		if (posix_spawnp(&pid, "git", NULL, NULL, argv, environ) == 0) {
 			waitpid(pid, &status, 0);
 			if (WIFEXITED(status)) {
-				exit_code = WEXITSTATUS(status);
-				return exit_code;
+				return WEXITSTATUS(status) == 0;
 			}
 		}
 	}
