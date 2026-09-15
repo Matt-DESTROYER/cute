@@ -6,6 +6,15 @@
 #include <stdarg.h>
 #include <string.h>
 
+#if __WINDOWS
+	#include <windows.h>
+#else
+	#include <spawn.h>
+	#include <sys/wait.h>
+
+	extern char* environ;
+#endif
+
 char* format(const char* template_string, ...) {
 	if (template_string == NULL)
 		return NULL;
@@ -95,22 +104,86 @@ bool fetch_package(const char* repo_url, const char* package_name, const char* l
 		return true;
 	}
 
+#if __WINDOWS
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
+
 	char* command;
 	if (version == NULL) {
 		command = format("git clone --depth 1 -q \"%s\" \"%s\"", repo_url, package_folder);
 	} else {
-		command = format("git clone --depth 1 --branch v%s -q \"%s\" \"%s\"", repo_url, package_folder, version);
+		command = format("git clone --depth 1 --branch v%s -q \"%s\" \"%s\"", version, repo_url, package_folder);
 	}
 
+	if (CreateProcessA(
+		NULL, // parse application from command line args
+		command, // command line args
+		NULL, // process handle
+		NULL, // thread handle
+		FALSE, // set handle inheritance false
+		0, // no creation flags
+		NULL, // use parent's environment block
+		NULL, // use parent's starting directory
+		&si,
+		&pi
+	)) {
+		free(command);
+
+		WaitForSingleObject(pi.hProcess, INFINITE);
+
+		DWORD exit_code;
+		if (GetExitCodeProcess(pi.hProcess, &exit_code)) {
+			exit_code = (int)exit_code;
+			return exit_code == 0;
+		}
+
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+	} else {
+		free(command);
+		return 1;
+	}
+#else
+	pid_t pid;
+	int status;
+
+	if (version == NULL) {
+		char* argv[] = {
+			"git", "clone", "--depth", "1", "-q",
+			repo_url, package_folder, NULL
+		};
+
+		if (posix_spawnp(&pid, "git", NULL, NULL, argv, environ) == 0) {
+			waitpid(pid, &status, 0);
+			if (WIFEXITED(status)) {
+				exit_code = WEXITSTATUS(status);
+				return exit_code;
+			}
+		}
+	} else {
+		char* branch = format("v%s", version);
+
+		char* argv[] = {
+			"git", "clone", "--depth", "1", "--branch", branch, "-q"
+			repo_url, package_folder, NULL
+		};
+
+		if (posix_spawnp(&pid, "git", NULL, NULL, argv, environ) == 0) {
+			waitpid(pid, &status, 0);
+			if (WIFEXITED(status)) {
+				exit_code = WEXITSTATUS(status);
+				return exit_code;
+			}
+		}
+	}
+#endif
+
 	free(package_folder);
-	if (command == NULL)
-		return false;
 
-	int exit_code = system(command);
-
-	free(command);
-
-	return exit_code == 0;
+	return 1;
 }
 
 int int_min(int x, int y) {
