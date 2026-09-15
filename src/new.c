@@ -134,7 +134,6 @@ new_project_result_t new_project(int argc, char* argv[]) {
 		return PROJECT_NO_NAME;
 
 	char* directory = format("./%s", project_name);
-	char* libraries_dir = foramt("%s/.libraries", directory);
 	char* ini_path = format("%s/Cute.ini", directory);
 	char* lock_path = format("%s/Cute.lock", directory);
 	char* cmakelists_txt_path = format("%s/CMakeLists.txt", directory);
@@ -146,7 +145,6 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	else
 		main_path = format("%s/main.c", src_dir);
 
-	char* include_dir = format("%s/.includes", directory);
 	char* libraries_dir = format("%s/.libraries", directory);
 
 	if (directory_exists(project_name))
@@ -199,8 +197,6 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	free(cmakelists_txt_path);
 	free(src_dir);
 	free(main_path);
-	free(include_dir);
-	free(libraries_dir);
 
 	return PROJECT_SUCCESS;
 }
