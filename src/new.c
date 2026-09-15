@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {\n\
 ";
 
 const char* HEADER = "#ifndef %s_H\n\
-#define %s_h\n\
+#define %s_H\n\
 \n\
 \n\
 #endif\n\
