@@ -39,6 +39,51 @@ Once a package is added, it's ready to use.
 
 When you're ready, run `cute build` to build your project!
 
+## Example
+
+Here is a complete example of setting up and building a `cute` project.
+
+```sh
+$ cute new hello_world
+$ cd hello_world
+$ ls
+CMakeLists.txt  Cute.ini  Cute.lock  src
+$ ls src
+main.c
+$ cat src/main.c
+#include <stdlib.h>
+#include <stdio.h>
+
+int main(int argc, char* argv[]) {
+        printf("Hello, world!\n");
+
+        return EXIT_SUCCESS;
+}
+$ nano src/main.c
+$ cat src/main.c
+#include <stdlib.h>
+#include <string.h>
+#include <file-io.h>
+
+const char* hello_world = "Hello, world!\n";
+
+int main(int argc, char* argv[]) {
+        file_t file = file_open("hello.txt", WRITE);
+        if (file)
+                file_write(file, hello_world, strlen(hello_world));
+        file_close(file);
+
+        return EXIT_SUCCESS;
+}
+cute add Matt-DESTROYER/file-io
+cute build
+./build/hello_world
+cat hello.txt
+Hello, world!
+```
+
+Refer to the `examples` folder to see more examples of cute projects.
+
 ## Planned functionality
  - Initialise a C program (similar to `cargo new`)
  - 'Install' libraries (similar to `cargo add`, will be limited as to where they can be installed from)

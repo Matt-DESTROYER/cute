@@ -42,13 +42,15 @@ add_package_result_t add_package(int argc, char **argv) {
 
 	free(package_location);
 	free(package_url);
-	free(project_root);
 
 	if (!res)
 		return ADD_FETCH_FAILED;
 
 	// TODO: properly locate root directory, we may be in a nested dir
-	ini_t* ini = ini_read("./Cute.ini");
+	char* ini_path = format("%s/Cute.ini", project_root);
+	ini_t* ini = ini_read(ini_path);
+	free(project_root);
+	free(ini_path);
 
 	if (package_version == NULL) {
 		ini_add_kv_pair(ini, "dependencies", package_name, "");
