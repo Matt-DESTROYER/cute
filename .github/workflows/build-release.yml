@@ -37,13 +37,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install Dependencies (Linux)
-      if: runner.os ==  'Linux'
-      run: sudo apt update && sudo apt install -y libcurl4-openssl-dev
+#    - name: Install Dependencies (Linux)
+#      if: runner.os ==  'Linux'
+#      run: sudo apt update && sudo apt install -y libcurl4-openssl-dev
 
-    - name: Install Dependencies (Windows)
-      if: runner.os == 'Windows'
-      run: vcpkg install curl:x64-windows
+#    - name: Install Dependencies (Windows)
+#      if: runner.os == 'Windows'
+#      run: vcpkg install curl:x64-windows
 
     - name: Configure CMake
       shell: bash
@@ -51,7 +51,7 @@ jobs:
         CC: ${{ matrix.c_compiler }}
       run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
-          cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+          cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release# -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
         else
           cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release
         fi
