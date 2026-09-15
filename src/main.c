@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VERSION "0.5"
+#define VERSION "0.7"
 
 int main(int argc, char* argv[]) {
 	if (argc == 1) {
