@@ -134,6 +134,7 @@ new_project_result_t new_project(int argc, char* argv[]) {
 		return PROJECT_NO_NAME;
 
 	char* directory = format("./%s", project_name);
+	char* libraries_dir = foramt("%s/.libraries", directory);
 	char* ini_path = format("%s/Cute.ini", directory);
 	char* lock_path = format("%s/Cute.lock", directory);
 	char* cmakelists_txt_path = format("%s/CMakeLists.txt", directory);
@@ -165,6 +166,8 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	fprintf(cmakelists_txt_file, CMAKELISTS_TXT, project_name);
 
 	directory_create(src_dir);
+	directory_create(libraries_dir);
+	free(libraries_dir);
 
 	file_t main_file = file_open(main_path, WRITE_BINARY);
 	file_write(main_file, MAIN_C, strlen(MAIN_C));
