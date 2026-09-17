@@ -77,7 +77,7 @@ jobs:
       shell: bash
       run: |
         CUTE="artifact/cute"
-        if [ -F "artifact/cute.exe" ]; then
+        if [ -f "artifact/cute.exe" ]; then
           BIN="artifact/cute.exe"
         fi
 
