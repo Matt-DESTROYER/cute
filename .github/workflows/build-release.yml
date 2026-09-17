@@ -78,12 +78,12 @@ jobs:
       run: |
         CUTE="artifact/cute"
         if [ -f "artifact/cute.exe" ]; then
-          BIN="artifact/cute.exe"
+          CUTE="artifact/cute.exe"
         fi
 
-        chmod +x "$BIN"
+        chmod +x "$CUTE"
 
-        version=$("$BIN" version | tr -d '\r')
+        version=$("$CUTE" version | tr -d '\r')
 
         if [[ "$version" != "${{ github.ref_name }}" ]]; then
           echo "Error: binary version ($version) doesn't match tag version (${{ github.ref_name }})"
