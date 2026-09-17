@@ -118,6 +118,7 @@ const char* HEADER = "#ifndef %s_H\n\
 new_project_result_t new_project(int argc, char* argv[]) {
 	char* project_name = NULL;
 	bool is_library = false;
+	bool init = false;
 	for (int i = 2; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			if (project_name != NULL)
@@ -128,13 +129,20 @@ new_project_result_t new_project(int argc, char* argv[]) {
 		} else if (strcmp(argv[i], "--lib") == 0
 				|| strcmp(argv[i], "-l") == 0) {
 			is_library = true;
+		} else if (strcmp(argv[i], "--init") == 0) {
+			init = true;
 		}
 	}
 
 	if (project_name == NULL)
 		return PROJECT_NO_NAME;
 
-	char* directory = format("./%s", project_name);
+	char* directory;
+	if (init) {
+		directory = format("./");
+	} else {
+		directory = format("./%s", project_name);
+	}
 	char* ini_path = format("%s/Cute.ini", directory);
 	char* lock_path = format("%s/Cute.lock", directory);
 	char* cmakelists_txt_path = format("%s/CMakeLists.txt", directory);
@@ -148,10 +156,12 @@ new_project_result_t new_project(int argc, char* argv[]) {
 
 	char* libraries_dir = format("%s/.libraries", directory);
 
-	if (directory_exists(project_name))
-		return PROJECT_DIR_ALREADY_EXISTS;
+	if (!init) {
+		if (directory_exists(project_name))
+			return PROJECT_DIR_ALREADY_EXISTS;
 
-	directory_create(project_name);
+		directory_create(project_name);
+	}
 
 	file_t ini_file = file_open(ini_path, WRITE_BINARY);
 	fprintf(ini_file, CUTE_INI, project_name, is_library ? "library" : "executable");
