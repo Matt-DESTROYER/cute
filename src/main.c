@@ -2,12 +2,11 @@
 #include "add.h"
 #include "clean.h"
 #include "build.h"
+#include "version.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define VERSION "0.7"
 
 int main(int argc, char* argv[]) {
 	if (argc == 1) {

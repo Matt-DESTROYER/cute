@@ -1,6 +1,7 @@
 #include "tools.h"
 #include "file_io.h"
 #include "new.h"
+#include "version.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,7 @@
 
 const char* CUTE_INI = "; cute package manager settings\n\
 [cute]\n\
-version = \"0\"\n\
+version = \"" VERSION "\"\n\
 \n\
 ; your project settings\n\
 [project]\n\
