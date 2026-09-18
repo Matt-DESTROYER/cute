@@ -115,6 +115,11 @@ const char* HEADER = "#ifndef %s_H\n\
 #endif\n\
 ";
 
+const char* GITIGNORE = "# Cute\n\
+build/\n\
+.libraries/\n\
+";
+
 new_project_result_t new_project(int argc, char* argv[]) {
 	char* project_name = NULL;
 	bool is_library = false;
@@ -137,22 +142,19 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	if (project_name == NULL)
 		return PROJECT_NO_NAME;
 
-	char* directory;
-	if (init) {
-		directory = format("./");
-	} else {
-		directory = format("./%s", project_name);
-	}
+	char* directory = init
+		? format("./")
+		: format("./%s", project_name);
+
 	char* ini_path = format("%s/Cute.ini", directory);
 	char* lock_path = format("%s/Cute.lock", directory);
 	char* cmakelists_txt_path = format("%s/CMakeLists.txt", directory);
+	char* gitignore_path = format("%s/.gitignore", directory);
 
 	char* src_dir = format("%s/src", directory);
-	char* main_path;
-	if (is_library)
-		main_path = format("%s/%s.c", src_dir, project_name);
-	else
-		main_path = format("%s/main.c", src_dir);
+	char* main_path = is_library
+		? format("%s/%s.c", src_dir, project_name)
+		: format("%s/main.c", src_dir);
 
 	char* libraries_dir = format("%s/.libraries", directory);
 
@@ -173,6 +175,14 @@ new_project_result_t new_project(int argc, char* argv[]) {
 
 	file_t cmakelists_txt_file = file_open(cmakelists_txt_path, WRITE_BINARY);
 	fprintf(cmakelists_txt_file, CMAKELISTS_TXT, project_name);
+	file_close(cmakelists_txt_file);
+
+	// don't overwrite pre-existing .gitignores
+	file_t gitignore_file = file_exists(gitignore_path)
+		? file_open(gitignore_path, APPEND_BINARY)
+		: file_open(gitignore_path, WRITE_BINARY);
+	file_write(gitignore_file, GITIGNORE, strlen(GITIGNORE));
+	file_close(gitignore_file);
 
 	directory_create(src_dir);
 	directory_create(libraries_dir);
