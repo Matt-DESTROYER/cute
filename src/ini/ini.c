@@ -1,5 +1,6 @@
-#include "tools.h"
-#include "file_io.h"
+#include <file-io.h>
+
+#include "../tools/tools.h"
 #include "ini.h"
 
 #include <stdlib.h>
