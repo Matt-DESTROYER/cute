@@ -37,13 +37,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-#    - name: Install Dependencies (Linux)
-#      if: runner.os ==  'Linux'
-#      run: sudo apt update && sudo apt install -y libcurl4-openssl-dev
-
-#    - name: Install Dependencies (Windows)
-#      if: runner.os == 'Windows'
-#      run: vcpkg install curl:x64-windows
+      # this step will be needed until a previous version of cute can be used
+      # to compile the package
+    - name: Bootstrap dependencies
+      shell: bash
+      run: |
+        mkdir -p .libraries/Matt-DESTROYER_file-io
+        git clone https://github.com/Matt-DESTROYER/file-io.git .libraries/Matt-DESTROYER_file-io
 
     - name: Configure CMake
       shell: bash
