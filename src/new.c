@@ -188,9 +188,11 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	directory_create(libraries_dir);
 	free(libraries_dir);
 
-	file_t main_file = file_open(main_path, WRITE_BINARY);
-	file_write(main_file, MAIN_C, strlen(MAIN_C));
-	file_close(main_file);
+	if (!file_exists(main_path)) {
+		file_t main_file = file_open(main_path, WRITE_BINARY);
+		file_write(main_file, MAIN_C, strlen(MAIN_C));
+		file_close(main_file);
+	}
 
 	if (is_library) {
 		char* capitalised_project_name = bounded_strdup(project_name, 0, strlen(project_name));
@@ -202,13 +204,15 @@ new_project_result_t new_project(int argc, char* argv[]) {
 		char* header_txt = format(HEADER, capitalised_project_name, capitalised_project_name);
 		free(capitalised_project_name);
 
-		file_t header_file = file_open(header_path, WRITE_BINARY);
+		if (!file_exists(header_path)) {
+			file_t header_file = file_open(header_path, WRITE_BINARY);
+
+			if (header_file != NULL)
+				file_write(header_file, header_txt, strlen(HEADER));
+			file_close(header_file);
+		}
+
 		free(header_path);
-
-		if (header_file != NULL)
-			file_write(header_file, header_txt, strlen(HEADER));
-		file_close(header_file);
-
 		free(header_txt);
 	}
 
