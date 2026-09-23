@@ -26,6 +26,7 @@ void build(int argc, char* argv[]) {
 		return;
 	}
 
+	printf("Fetching dependencies...\n");
 	char* cute_ini = format("%s/Cute.ini", project_root);
 	fetch_packages_from_ini(cute_ini);
 	free(cute_ini);

@@ -45,9 +45,9 @@ void fetch_packages_from_ini(const char* ini_path) {
 		char* package_name = ini_table_item_key(deps_iter);
 
 		char* package_dir = bounded_strdup(package_name, 0, strlen(package_name));
-		flatten_directory_name(package_name);
+		flatten_directory_name(package_dir);
 
-		char* cute_ini_location = format("%s/%s/Cute.ini", package_dir, package_dir);
+		char* cute_ini_location = format("%s/%s/Cute.ini", libraries_dir, package_dir);
 		free(package_dir);
 
 		bool cute_ini_exists = file_exists(cute_ini_location);
