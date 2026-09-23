@@ -64,7 +64,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: ./previous-release/bin/cute build
+      run: ./previous-release/cute build
 
     - name: Prepare artifact directory
       shell: bash
