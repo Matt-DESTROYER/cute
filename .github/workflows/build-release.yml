@@ -56,10 +56,12 @@ jobs:
           gh release download "$PREVIOUS_TAG" \
             --pattern "cute-${{ matrix.asset_name }}.zip" \
             --dir previous-release
+          tar -xf "cute-${{ matrix.asset_name }}.zip"
         else
           gh release download "$PREVIOUS_TAG" \
             --pattern "cute-${{ matrix.asset_name }}.tar.gz" \
             --dir previous-release
+          tar -xf "cute-${{ matrix.asset_name }}.tar.gz"
         fi
 
     - name: Build
