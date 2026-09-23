@@ -1,5 +1,5 @@
-#ifndef NEW_H
-#define NEW_H
+#ifndef CUTE_NEW_H
+#define CUTE_NEW_H
 
 typedef enum new_project_result {
     PROJECT_SUCCESS,

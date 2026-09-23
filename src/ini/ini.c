@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef struct assoc_arr_item assoc_arr_item_t;
 struct assoc_arr_item {
 	char* key;
 	char* value;
@@ -15,19 +14,6 @@ struct assoc_arr_item {
 	assoc_arr_item_t* next;
 	assoc_arr_item_t* prev;
 };
-
-typedef struct assoc_arr {
-	assoc_arr_item_t* head;
-	assoc_arr_item_t* tail;
-
-	size_t size;
-} assoc_arr_t;
-
-typedef struct ini_table {
-	char* name;
-
-	assoc_arr_t table;
-} ini_table_t;
 
 typedef struct ini_table_item ini_table_item_t;
 struct ini_table_item {
@@ -552,5 +538,40 @@ bool ini_write(ini_t* ini) {
 	file_close(ini_file);
 
 	return true;
+}
+
+// PUBLIC API EXPOSURE METHODS
+// these should be purely bridges to enable using internal functionality
+// in a way that makes sense
+
+ini_table_t* ini_get_table(ini_t* ini, const char* table) {
+	return ini_table_arr_search_tables(ini->table, table);
+}
+
+char* ini_table_get(ini_table_t* table, const char* key) {
+	return ini_table_search(*table, key);
+}
+
+ini_table_iter_t ini_table_to_iter(ini_table_t* table) {
+	return ini_table_first(table);
+}
+ini_table_iter_t ini_table_first(ini_table_t* table) {
+	return (ini_table_iter_t)table->table.head;
+}
+ini_table_iter_t ini_table_last(ini_table_t* table) {
+	return (ini_table_iter_t)table->table.tail;
+}
+ini_table_iter_t ini_table_next(ini_table_iter_t item) {
+	return (ini_table_iter_t)item->next;
+}
+ini_table_iter_t ini_table_prev(ini_table_iter_t item) {
+	return (ini_table_iter_t)item->prev;
+}
+
+char* ini_table_item_key(ini_table_iter_t item) {
+	return item->key;
+}
+char* ini_table_item_value(ini_table_iter_t item) {
+	return item->value;
 }
 

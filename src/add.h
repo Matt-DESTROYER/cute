@@ -1,5 +1,5 @@
-#ifndef ADD_H
-#define ADD_H
+#ifndef CUTE_ADD_H
+#define CUTE_ADD_H
 
 typedef enum add_package_result {
     ADD_NOT_CUTE_PROJECT,
