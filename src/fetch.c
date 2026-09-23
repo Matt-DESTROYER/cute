@@ -9,6 +9,7 @@
 #include "ini/ini.h"
 
 char* installed_package_version(const char* package_name) {
+	(void)package_name;
 	return NULL;
 }
 
