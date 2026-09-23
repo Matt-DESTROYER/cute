@@ -1,45 +1,71 @@
 #include <file-io.h>
 #include <stddef.h>
+#include <stdbool.h>
+#include <string.h>
 
 #include "fetch.h"
 
 #include "tools/tools.h"
 #include "ini/ini.h"
 
+char* installed_package_version(const char* package_name) {
+	return NULL;
+}
+
 void fetch_packages_from_ini(const char* ini_path) {
 	ini_t* ini;
+
+	char* project_root = file_root_by_file("Cute.ini");
+	if (project_root == NULL) {
+		printf("Not a Cute project...\n");
+		return;
+	}
+
+	char* libraries_dir = format("%s/.libraries", project_root);
+
 	if (ini_path == NULL) {
-		char* root = file_root_by_file("Cute.ini");
-		char* cute_path = format("%s/Cute.ini", root);
-
-		ini = ini_read(ini_path);
-
+		char* cute_path = format("%s/Cute.ini", project_root);
+		ini = ini_read(cute_path);
 		free(cute_path);
-		free(root);
 	} else {
 		ini = ini_read(ini_path);
 	}
 
-	ini_table_t* dependencies_table = ini_get_table(ini, "dependencies");
-	if (dependencies_table == NULL) {
+	ini_table_t* deps_table = ini_get_table(ini, "dependencies");
+	if (deps_table == NULL) {
+		free(libraries_dir);
+		free(project_root);
 		ini_cleanup(ini);
 		return;
 	}
 
-	ini_table_iter_t deps_iter = ini_table_first(dependencies_table);
+	ini_table_iter_t deps_iter = ini_table_to_iter(deps_table);
 
 	while (deps_iter != NULL) {
-		// TODO: check if dep is installed
-		// if not: install
-		// if so:
-		//   check dep version
-		//   if correct or not specified:
-		//     do nothing
-		//   if not:
-		//     error
+		char* package_name = ini_table_item_key(deps_iter);
+
+		char* package_dir = bounded_strdup(package_name, 0, strlen(package_name));
+		flatten_directory_name(package_name);
+
+		char* cute_ini_location = format("%s/%s/Cute.ini", package_dir, package_dir);
+		free(package_dir);
+
+		bool cute_ini_exists = file_exists(cute_ini_location);
+		free(cute_ini_location);
+
+		if (!cute_ini_exists) {
+			printf("Installing %s...\n", package_name);
+			char* repo_url = format("https://github.com/%s.git", package_name);
+			fetch_package(repo_url, package_name, libraries_dir, NULL);
+			free(repo_url);
+		}
 
 		deps_iter = ini_table_next(deps_iter);
 	}
 
+	free(libraries_dir);
+	free(project_root);
+
 	ini_cleanup(ini);
+
 }

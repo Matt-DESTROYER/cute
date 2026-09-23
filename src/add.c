@@ -46,7 +46,6 @@ add_package_result_t add_package(int argc, char **argv) {
 	if (!res)
 		return ADD_FETCH_FAILED;
 
-	// TODO: properly locate root directory, we may be in a nested dir
 	char* ini_path = format("%s/Cute.ini", project_root);
 	ini_t* ini = ini_read(ini_path);
 	free(project_root);

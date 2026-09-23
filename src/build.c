@@ -2,6 +2,7 @@
 
 #include "tools/tools.h"
 #include "build.h"
+#include "fetch.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,6 +25,10 @@ void build(int argc, char* argv[]) {
 		printf("Not a Cute project...\n");
 		return;
 	}
+
+	char* cute_ini = format("%s/Cute.ini", project_root);
+	fetch_packages_from_ini(cute_ini);
+	free(cute_ini);
 
 	int exit_code;
 
