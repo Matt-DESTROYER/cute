@@ -36,29 +36,35 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      # this step will be needed until a previous version of cute can be used
-      # to compile the package
-    - name: Bootstrap dependencies
-      shell: bash
-      run: |
-        mkdir -p .libraries/Matt-DESTROYER_file-io
-        git clone https://github.com/Matt-DESTROYER/file-io.git .libraries/Matt-DESTROYER_file-io
-
-    - name: Configure CMake
+    - name: Download previous Cute release
       shell: bash
       env:
-        CC: ${{ matrix.c_compiler }}
+        GH_TOKEN: ${{ github.token }}
       run: |
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release # -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+        PREVIOUS_TAG=$(gh release list \
+          --limit 2 \
+          --exclude-drafts \
+          --exclude-pre-releases \
+          --json tagName \
+          --jq '.[1].tagName' \
+        )
+
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          gh release download "$PREVIOUS_TAG" \
+            --pattern "cute-${{ matrix.asset_name }}.zip" \
+            --dir previous-release
         else
-          cmake -S "${{ github.workspace }}" -B "${{ github.workspace }}/build" -DCMAKE_BUILD_TYPE=Release
+          gh release download "$PREVIOUS_TAG" \
+            --pattern "cute-${{ matrix.asset_name }}.tar.gz" \
+            --dir previous-release
         fi
 
     - name: Build
       shell: bash
-      run: cmake --build "${{ github.workspace }}/build" --config Release
+      run: ./previous-release/bin/cute build
 
     - name: Prepare artifact directory
       shell: bash
