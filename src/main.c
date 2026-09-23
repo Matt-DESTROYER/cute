@@ -1,12 +1,16 @@
-#include "new.h"
-#include "add.h"
-#include "clean.h"
-#include "build.h"
-#include "version.h"
+#include "tools/tools.h"
 
+#include <file-io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "new.h"
+#include "add.h"
+#include "build.h"
+#include "fetch.h"
+#include "clean.h"
+#include "version.h"
 
 int main(int argc, char* argv[]) {
 	if (argc == 1) {
@@ -20,11 +24,9 @@ int main(int argc, char* argv[]) {
 		printf("%s\n", VERSION);
 	} else if (strcmp(argv[1], "new") == 0) {
 		/*new_project_result_t res = */new_project(argc, argv);
-	} else if (strcmp(argv[1], "add") == 0
-			|| strcmp(argv[1], "install") == 0) {
+	} else if (strcmp(argv[1], "add") == 0) {
 		/*add_package_result_t res = */add_package(argc, argv);
-	} else if (strcmp(argv[1], "remove") == 0
-			|| strcmp(argv[1], "uninstall") == 0) {
+	} else if (strcmp(argv[1], "remove") == 0) {
 		// TODO
 		printf("Not yet implemented...\n");
 	} else if (strcmp(argv[1], "update") == 0) {
@@ -34,6 +36,17 @@ int main(int argc, char* argv[]) {
 		clean();
 	} else if (strcmp(argv[1], "build") == 0) {
 		build(argc, argv);
+	} else if (strcmp(argv[1], "fetch") == 0) {
+		char* project_root = file_root_by_file("Cute.ini");
+		if (project_root == NULL) {
+			printf("Not a Cute project...\n");
+			return EXIT_SUCCESS;
+		}
+
+		printf("Fetching dependencies...\n");
+		char* cute_ini = format("%s/Cute.ini", project_root);
+		fetch_packages_from_ini(cute_ini);
+		free(cute_ini);
 	} else {
 		printf("Unknown argument supplied... doing nothing!\n");
 	}
