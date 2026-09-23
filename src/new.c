@@ -97,6 +97,12 @@ else()\n\
 		$<$<CONFIG:Debug>:-g;-O0>\n\
 	)\n\
 endif()\n\
+\n\
+if(IS_ROOT_PROJECT)\n\
+	INSTALL(TARGETS ${PROJECT_NAME}\n\
+		RUNTIME DESTINATION bin\n\
+	)\n\
+endif()\n\
 ";
 
 const char* MAIN_C = "#include <stdlib.h>\n\

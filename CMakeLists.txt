@@ -68,3 +68,9 @@ else()
 		$<$<CONFIG:Debug>:-g;-O0>
 	)
 endif()
+
+if(IS_ROOT_PROJECT)
+	install(TARGETS ${PROJECT_NAME}
+		RUNTIME DESTINATION bin
+	)
+endif()
