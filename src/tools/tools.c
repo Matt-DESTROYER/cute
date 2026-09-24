@@ -138,6 +138,10 @@ bool fetch_package(char* repo_url, char* package_name, char* location, char* ver
 		DWORD exit_code;
 		if (GetExitCodeProcess(pi.hProcess, &exit_code)) {
 			exit_code = (int)exit_code;
+			
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+
 			return exit_code == 0;
 		}
 
@@ -184,10 +188,3 @@ bool fetch_package(char* repo_url, char* package_name, char* location, char* ver
 
 	return 1;
 }
-
-int int_min(int x, int y) {
-	if (x < y)
-		return x;
-	return y;
-}
-
