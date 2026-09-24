@@ -1,7 +1,9 @@
 #ifndef CUTE_BUILD_H
 #define CUTE_BUILD_H
 
-void build(int argc, char* argv[]);
+#include "error.h"
+
+cute_error_t build(int argc, char* argv[]);
 
 #endif
 

@@ -7,11 +7,6 @@
 	#define __WINDOWS 0
 #endif
 
-#if !__WINDOWS
-	#define _POSIX_C_SOURCE 200112L
-	#define _FILE_OFFSET_BITS 64
-#endif
-
 #include <stdbool.h>
 #include <stdlib.h>
 

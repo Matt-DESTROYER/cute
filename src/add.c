@@ -1,19 +1,20 @@
 #include <file-io.h>
-
-#include "tools/tools.h"
-#include "ini/ini.h"
-
-#include "add.h"
-
 #include <stdlib.h>
 #include <stdbool.h>
 
-add_package_result_t add_package(int argc, char **argv) {
+#include "tools/tools.h"
+#include "ini/ini.h"
+#include "error.h"
+
+#include "add.h"
+
+cute_error_t add_package(int argc, char **argv) {
 	char* project_root = file_root_by_file("Cute.ini");
-	if (project_root == NULL) {
-		printf("Not a Cute project...\n");
-		return ADD_NOT_CUTE_PROJECT;
-	}
+	if (project_root == NULL)
+		return (cute_error_t){
+			.status_code = CUTE_ERROR_INVALID_ARGUMENT,
+			.message = "Not within a Cute package."
+		};
 
 	char* package_name = NULL;
 	char* package_version = NULL;
@@ -25,7 +26,10 @@ add_package_result_t add_package(int argc, char **argv) {
 			} else if (package_version == NULL) {
 				package_version = argv[i];
 			} else {
-			 	return ADD_INVALID_ARGS;
+			 	return (cute_error_t){
+					.status_code = CUTE_ERROR_INVALID_ARGUMENT,
+					.message = "Invalid argument supplied."
+				};
 			}
 
 			continue;
@@ -33,7 +37,10 @@ add_package_result_t add_package(int argc, char **argv) {
 	}
 
 	if (package_name == NULL)
-		return ADD_NO_PACKAGE_NAME;
+		return (cute_error_t){
+			.status_code = CUTE_ERROR_INVALID_ARGUMENT,
+			.message = "No package name supplied."
+		};
 
 	char* package_url = format("https://github.com/%s.git", package_name);
 	char* package_location = format("%s/.libraries/", project_root);
@@ -44,7 +51,10 @@ add_package_result_t add_package(int argc, char **argv) {
 	free(package_url);
 
 	if (!res)
-		return ADD_FETCH_FAILED;
+		return (cute_error_t){
+			.status_code = CUTE_ERROR_PACKAGE,
+			.message = "Failed to fetch package."
+		};
 
 	char* ini_path = format("%s/Cute.ini", project_root);
 	ini_t* ini = ini_read(ini_path);
@@ -61,6 +71,9 @@ add_package_result_t add_package(int argc, char **argv) {
 
 	ini_cleanup(ini);
 
-	return ADD_SUCCESS;
+	return (cute_error_t){
+		.status_code = CUTE_SUCCESS,
+		.message = ""
+	};
 }
 

@@ -1,13 +1,14 @@
 #include <file-io.h>
-
-#include "tools/tools.h"
-#include "new.h"
-#include "version.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+#include "tools/tools.h"
+#include "version.h"
+#include "error.h"
+
+#include "new.h"
 
 const char* CUTE_INI = "; cute package manager settings\n\
 [cute]\n\
@@ -127,14 +128,17 @@ build/\n\
 .libraries/\n\
 ";
 
-new_project_result_t new_project(int argc, char* argv[]) {
+cute_error_t new_project(int argc, char* argv[]) {
 	char* project_name = NULL;
 	bool is_library = false;
 	bool init = false;
 	for (int i = 2; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			if (project_name != NULL)
-				return PROJECT_INVALID_ARGS;
+				return (cute_error_t){
+					.status_code = CUTE_ERROR_INVALID_ARGUMENT,
+					.message = "Missing project name."
+				};
 
 			project_name = argv[i];
 			continue;
@@ -147,7 +151,10 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	}
 
 	if (project_name == NULL)
-		return PROJECT_NO_NAME;
+		return (cute_error_t){
+			.status_code = CUTE_ERROR_INVALID_ARGUMENT,
+			.message = "Missing project name."
+		};
 
 	char* directory = init
 		? format("./")
@@ -167,7 +174,10 @@ new_project_result_t new_project(int argc, char* argv[]) {
 
 	if (!init) {
 		if (directory_exists(project_name))
-			return PROJECT_DIR_ALREADY_EXISTS;
+			return (cute_error_t){
+				.status_code = CUTE_ERROR_DIRECTORY,
+				.message = "Project directory already exists."
+			};
 
 		directory_create(project_name);
 	}
@@ -230,6 +240,8 @@ new_project_result_t new_project(int argc, char* argv[]) {
 	free(src_dir);
 	free(main_path);
 
-	return PROJECT_SUCCESS;
+	return (cute_error_t){
+		.status_code = CUTE_SUCCESS,
+		.message = ""
+	};
 }
-

@@ -3,23 +3,26 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "fetch.h"
-
 #include "tools/tools.h"
 #include "ini/ini.h"
+#include "error.h"
+
+#include "fetch.h"
 
 char* installed_package_version(const char* package_name) {
 	(void)package_name;
 	return NULL;
 }
 
-void fetch_packages_from_ini(const char* ini_path) {
+cute_error_t fetch_packages_from_ini(const char* ini_path) {
 	ini_t* ini;
 
 	char* project_root = file_root_by_file("Cute.ini");
 	if (project_root == NULL) {
-		printf("Not a Cute project...\n");
-		return;
+		return (cute_error_t){
+			.status_code = CUTE_ERROR_INVALID_ARGUMENT,
+			.message = "Not within a Cute package."
+		};
 	}
 
 	char* libraries_dir = format("%s/.libraries", project_root);
@@ -36,8 +39,13 @@ void fetch_packages_from_ini(const char* ini_path) {
 	if (deps_table == NULL) {
 		free(libraries_dir);
 		free(project_root);
+
 		ini_cleanup(ini);
-		return;
+
+		return (cute_error_t){
+			.status_code = CUTE_SUCCESS,
+			.message = ""
+		};
 	}
 
 	ini_table_iter_t deps_iter = ini_table_to_iter(deps_table);
@@ -69,4 +77,8 @@ void fetch_packages_from_ini(const char* ini_path) {
 
 	ini_cleanup(ini);
 
+	return (cute_error_t){
+		.status_code = CUTE_SUCCESS,
+		.message = ""
+	};
 }
