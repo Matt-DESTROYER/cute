@@ -1,10 +1,9 @@
-#include "tools/tools.h"
-
 #include <file-io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "tools/tools.h"
 #include "error.h"
 #include "new.h"
 #include "add.h"
