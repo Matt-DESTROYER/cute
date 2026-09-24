@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "error.h"
 #include "new.h"
 #include "add.h"
 #include "build.h"
@@ -19,13 +20,17 @@ int main(int argc, char* argv[]) {
 	}
 
 	// handle actual command
+	cute_error_t err = (cute_error_t){
+		.status_code = CUTE_SUCCESS,
+		.message = ""
+	};
 	if (strcmp(argv[1], "version") == 0
 			|| strcmp(argv[1], "--version") == 0) {
 		printf("%s\n", VERSION);
 	} else if (strcmp(argv[1], "new") == 0) {
-		/*new_project_result_t res = */new_project(argc, argv);
+		err = new_project(argc, argv);
 	} else if (strcmp(argv[1], "add") == 0) {
-		/*add_package_result_t res = */add_package(argc, argv);
+		err = add_package(argc, argv);
 	} else if (strcmp(argv[1], "remove") == 0) {
 		// TODO
 		printf("Not yet implemented...\n");
@@ -33,9 +38,9 @@ int main(int argc, char* argv[]) {
 		// TODO
 		printf("Note yet implemented\n");
 	} else if (strcmp(argv[1], "clean") == 0) {
-		clean();
+		err = clean();
 	} else if (strcmp(argv[1], "build") == 0) {
-		build(argc, argv);
+		err = build(argc, argv);
 	} else if (strcmp(argv[1], "fetch") == 0) {
 		char* project_root = file_root_by_file("Cute.ini");
 		if (project_root == NULL) {
@@ -45,12 +50,17 @@ int main(int argc, char* argv[]) {
 
 		printf("Fetching dependencies...\n");
 		char* cute_ini = format("%s/Cute.ini", project_root);
-		fetch_packages_from_ini(cute_ini);
+		err = fetch_packages_from_ini(cute_ini);
 		free(cute_ini);
 	} else {
 		printf("Unknown argument supplied... doing nothing!\n");
 	}
 
+	if (err.status_code != CUTE_SUCCESS) {
+		printf("Error: %s\n", err.message);
+
+		return EXIT_FAILURE;
+	}
+
 	return EXIT_SUCCESS;
 }
-
