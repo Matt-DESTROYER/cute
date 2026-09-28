@@ -109,6 +109,12 @@ version_parse_status_t parse_version(const char* string, version_t* version) {
 	return VERSION_VALID;
 }
 
+void version_free(version_t* version) {
+	free(version->numbers);
+	version->numbers = NULL;
+	version->length = 0;
+}
+
 int version_cmp(const version_t* x, const version_t* y) {
 	if (x->type != y->type)
 		return x->type - y->type;

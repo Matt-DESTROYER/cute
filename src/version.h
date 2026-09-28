@@ -13,10 +13,10 @@ typedef enum version_restriction {
 } version_restriction_t;
 
 typedef enum version_type {
-	VERSION_RELEASE = 0,
-	VERSION_CANDIDATE = 1,
-	VERSION_BETA = 2,
-	VERSION_ALPHA = 3
+	VERSION_RELEASE = 3,
+	VERSION_CANDIDATE = 2,
+	VERSION_BETA = 1,
+	VERSION_ALPHA = 0
 } version_type_t;
 
 typedef enum version_parse_status {
@@ -32,6 +32,7 @@ typedef struct version {
 } version_t;
 
 version_parse_status_t parse_version(const char* string, version_t* version);
+void version_free(version_t* version);
 
 int version_cmp(const version_t* x, const version_t* y);
 
