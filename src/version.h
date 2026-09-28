@@ -1,7 +1,7 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VERSION "v0.14.2"
+#define VERSION "v0.14.3"
 
 #include <stddef.h>
 
