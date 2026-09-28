@@ -91,7 +91,7 @@ jobs:
 
         chmod +x "$CUTE"
 
-        version=$("$CUTE" version | tr -d '\r')
+        version=$("$CUTE" --version | tr -d '\r')
 
         if [[ "$version" != "${{ github.ref_name }}" ]]; then
           echo "Error: binary version ($version) doesn't match tag version (${{ github.ref_name }})"
