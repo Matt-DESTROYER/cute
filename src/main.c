@@ -23,8 +23,7 @@ int main(int argc, char* argv[]) {
 		.status_code = CUTE_SUCCESS,
 		.message = ""
 	};
-	if (strcmp(argv[1], "version") == 0
-			|| strcmp(argv[1], "--version") == 0) {
+	if (strcmp(argv[1], "--version") == 0) {
 		printf("%s\n", VERSION);
 	} else if (strcmp(argv[1], "new") == 0) {
 		err = new_project(argc, argv);
