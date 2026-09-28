@@ -4,7 +4,6 @@
 #define VERSION "v0.14.2"
 
 #include <stddef.h>
-#include <stdint.h>
 
 typedef enum version_restriction {
 	VERSION_MIN,
@@ -30,7 +29,7 @@ typedef struct version {
 	version_restriction_t restriction;
 	version_type_t type;
 
-	uint32_t* numbers;
+	int* numbers;
 	size_t length;
 } version_t;
 

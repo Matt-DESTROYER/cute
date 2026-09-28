@@ -6,10 +6,10 @@
 
 #include "version.h"
 
-uint32_t buffer_to_int(const char* buffer, size_t length) {
-	uint32_t num = 0;
+int buffer_to_int(const char* buffer, size_t length) {
+	int num = 0;
 	for (size_t i = 0; i < length; i++) {
-		num = num * 10 + (uint32_t)(buffer[i] - '0');
+		num = num * 10 + (int)(buffer[i] - '0');
 	}
 	return num;
 }
@@ -17,7 +17,7 @@ uint32_t buffer_to_int(const char* buffer, size_t length) {
 version_parse_status_t parse_version(const char* string, version_t* version) {
 	version->restriction = VERSION_MIN;
 	version->type = VERSION_RELEASE;
-	version->numbers = (uint32_t*)malloc(sizeof(uint32_t) * 3);
+	version->numbers = (int*)malloc(sizeof(int) * 3);
 	version->length = 3;
 
 	if (version->numbers == NULL) {
@@ -65,7 +65,7 @@ version_parse_status_t parse_version(const char* string, version_t* version) {
 		if (buffer_idx > 0) {
 			if (numbers_idx >= version->length) {
 				version->length *= 2;
-				uint32_t* new_buffer = (uint32_t*)realloc(version->numbers, sizeof(uint32_t) * version->length);
+				int* new_buffer = (int*)realloc(version->numbers, sizeof(int) * version->length);
 				if (new_buffer == NULL) {
 					free(buffer);
 					free(version->numbers);
@@ -75,7 +75,7 @@ version_parse_status_t parse_version(const char* string, version_t* version) {
 				}
 				version->numbers = new_buffer;
 			}
-			uint32_t num = buffer_to_int(buffer, buffer_idx);
+			int num = buffer_to_int(buffer, buffer_idx);
 			buffer_idx = 0;
 			version->numbers[numbers_idx] = num;
 			numbers_idx++;
@@ -96,7 +96,7 @@ version_parse_status_t parse_version(const char* string, version_t* version) {
 	free(buffer);
 
 	if (version->length != numbers_idx) {
-		uint32_t* new_buffer = (uint32_t*)realloc(version->numbers, sizeof(uint32_t) * numbers_idx);
+		int* new_buffer = (int*)realloc(version->numbers, sizeof(int) * numbers_idx);
 		if (new_buffer == NULL) {
 			free(version->numbers);
 			version->numbers = NULL;
