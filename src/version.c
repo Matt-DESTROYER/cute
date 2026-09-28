@@ -126,7 +126,7 @@ int version_cmp(const version_t* x, const version_t* y) {
 	}
 
 	if (x->length != y->length)
-		return x->length - y->length;
+		return (int)(x->length - y->length);
 
 	return 0;
 }
