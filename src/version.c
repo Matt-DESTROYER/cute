@@ -9,7 +9,7 @@
 uint32_t buffer_to_int(const char* buffer, size_t length) {
 	uint32_t num = 0;
 	for (size_t i = 0; i < length; i++) {
-		num += (uint32_t)(buffer[i] - '0') * ((uint32_t)length - i);
+		num = num * 10 + (uint32_t)(buffer[i] - '0');
 	}
 	return num;
 }
@@ -39,7 +39,7 @@ version_parse_status_t parse_version(const char* string, version_t* version) {
 	}
 
 	while (string[i] != '\0') {
-		if (isdigit(string[i])) {
+		if (isdigit((unsigned char)string[i])) {
 			if (buffer_idx == buffer_size) {
 				buffer_size *= 2;
 				char* new_buffer = (char*)realloc(buffer, sizeof(char) * buffer_size);
