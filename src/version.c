@@ -57,6 +57,8 @@ version_parse_status_t parse_version(const char* string, version_t* version) {
 
 			buffer[buffer_idx] = string[i];
 			buffer_idx++;
+
+			i++;
 			continue;
 		}
 
@@ -87,6 +89,8 @@ version_parse_status_t parse_version(const char* string, version_t* version) {
 		} else if (string[i] == 'r') {
 			version->type = VERSION_CANDIDATE;
 		}
+
+		i++;
 	}
 
 	free(buffer);
