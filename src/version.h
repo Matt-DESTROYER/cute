@@ -26,9 +26,7 @@ typedef enum version_parse_status {
 } version_parse_status_t;
 
 typedef struct version {
-	version_restriction_t restriction;
 	version_type_t type;
-
 	int* numbers;
 	size_t length;
 } version_t;

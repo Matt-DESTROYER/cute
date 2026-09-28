@@ -15,7 +15,6 @@ int buffer_to_int(const char* buffer, size_t length) {
 }
 
 version_parse_status_t parse_version(const char* string, version_t* version) {
-	version->restriction = VERSION_MIN;
 	version->type = VERSION_RELEASE;
 	version->numbers = (int*)malloc(sizeof(int) * 3);
 	version->length = 3;
