@@ -9,11 +9,6 @@
 
 #include "fetch.h"
 
-char* installed_package_version(const char* package_name) {
-	(void)package_name;
-	return NULL;
-}
-
 cute_error_t fetch_packages_from_ini(const char* ini_path) {
 	ini_t* ini;
 

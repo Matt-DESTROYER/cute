@@ -504,6 +504,8 @@ void ini_cleanup(ini_t* ini) {
 		free(temp);
 	}
 
+	free(ini->file_path);
+
 	free(ini);
 }
 

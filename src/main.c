@@ -25,6 +25,8 @@ int main(int argc, char* argv[]) {
 	};
 	if (strcmp(argv[1], "--version") == 0) {
 		printf("%s\n", VERSION);
+	} else if (strcmp(argv[1], "version") == 0) {
+		err = check_version();
 	} else if (strcmp(argv[1], "new") == 0) {
 		err = new_project(argc, argv);
 	} else if (strcmp(argv[1], "add") == 0) {

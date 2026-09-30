@@ -1,9 +1,11 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VERSION "v0.14.3"
+#define VERSION "v0.14.4"
 
 #include <stddef.h>
+
+#include "error.h"
 
 typedef enum version_restriction {
 	VERSION_MIN,
@@ -35,7 +37,8 @@ version_parse_status_t parse_version(const char* string, version_t* version);
 void version_free(version_t* version);
 
 int version_cmp(const version_t* x, const version_t* y);
-
 void sort_versions(version_t* versions, size_t count);
+
+cute_error_t check_version();
 
 #endif
