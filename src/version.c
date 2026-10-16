@@ -166,7 +166,7 @@ cute_error_t check_version() {
 	ini_table_t* table = ini_get_table(ini, "project");
 	char* project_version = ini_table_get(table, "version");
 	if (project_root != NULL) {
-		printf("%s\n", project_version);
+		printf("v%s\n", project_version);
 	}
 
 	free(project_root);
