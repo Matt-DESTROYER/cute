@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "tools/tools.h"
+#include "../tools/tools.h"
 #include "fetch.h"
-#include "error.h"
+#include "../error.h"
 
 #include "build.h"
 

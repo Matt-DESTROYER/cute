@@ -6,9 +6,9 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "tools/tools.h"
-#include "ini/ini.h"
-#include "error.h"
+#include "../tools/tools.h"
+#include "../ini/ini.h"
+#include "../error.h"
 
 #include "version.h"
 

@@ -4,9 +4,9 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "tools/tools.h"
+#include "../tools/tools.h"
 #include "version.h"
-#include "error.h"
+#include "../error.h"
 
 #include "new.h"
 

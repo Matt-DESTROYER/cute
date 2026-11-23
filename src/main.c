@@ -5,12 +5,12 @@
 
 #include "tools/tools.h"
 #include "error.h"
-#include "new.h"
-#include "add.h"
-#include "build.h"
-#include "fetch.h"
-#include "clean.h"
-#include "version.h"
+#include "commands/new.h"
+#include "commands/add.h"
+#include "commands/build.h"
+#include "commands/fetch.h"
+#include "commands/clean.h"
+#include "commands/version.h"
 
 int main(int argc, char* argv[]) {
 	if (argc == 1) {

@@ -1,7 +1,7 @@
 #include <file-io.h>
 
 #include "clean.h"
-#include "error.h"
+#include "../error.h"
 
 #include <stdlib.h>
 

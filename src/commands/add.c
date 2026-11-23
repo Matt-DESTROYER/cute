@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "tools/tools.h"
-#include "ini/ini.h"
-#include "error.h"
+#include "../tools/tools.h"
+#include "../ini/ini.h"
+#include "../error.h"
 
 #include "add.h"
 

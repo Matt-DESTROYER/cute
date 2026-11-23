@@ -5,7 +5,7 @@
 
 #include <stddef.h>
 
-#include "error.h"
+#include "../error.h"
 
 typedef enum version_restriction {
 	VERSION_MIN,
