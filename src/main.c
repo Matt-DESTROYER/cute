@@ -10,6 +10,7 @@
 #include "commands/add.h"
 #include "commands/update.h"
 #include "commands/build.h"
+#include "commands/test.h"
 #include "commands/fetch.h"
 #include "commands/clean.h"
 #include "commands/version.h"
@@ -49,6 +50,8 @@ int main(int argc, char* argv[]) {
 		err = clean();
 	} else if (strcmp(argv[1], "build") == 0) {
 		err = build(argc, argv);
+	} else if (strcmp(argv[1], "test") == 0) {
+		err = test(argc, argv);
 	} else if (strcmp(argv[1], "fetch") == 0) {
 		char* project_root = file_root_by_file("Cute.ini");
 		if (project_root == NULL) {

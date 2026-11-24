@@ -35,6 +35,7 @@ project(%s C)\n\
 set(CMAKE_C_STANDARD 11)\n\
 set(CMAKE_C_STANDARD_REQUIRED ON)\n\
 set(CMAKE_C_EXTENSIONS OFF)\n\
+include(CTest)\n\
 \n\
 file(GLOB_RECURSE SRC\n\
 	\"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c\"\n\
@@ -47,6 +48,8 @@ else()\n\
 endif()\n\
 \n\
 if(IS_ROOT_PROJECT)\n\
+	include(CTest)\n\
+\n\
 	file(GLOB installed_packages LIST_DIRECTORIES true\n\
 		\"${CMAKE_CURRENT_SOURCE_DIR}/.libraries/*\"\n\
 	)\n\
@@ -72,6 +75,19 @@ if(IS_ROOT_PROJECT)\n\
 \n\
 	if(PACKAGE_TARGETS)\n\
 		target_link_libraries(${CUTE_TARGET} PRIVATE ${PACKAGE_TARGETS})\n\
+	endif()\n\
+\n\
+	if(BUILD_TESTING AND EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/test.c\")\n\
+		add_executable(${PROJECT_NAME}_tests test.c)\n\
+\n\
+		target_link_libraries(${PROJECT_NAME}_tests PRIVATE\n\
+			${CUTE_TARGET}\n\
+			${PACKAGE_TARGETS}\n\
+		)\n\
+\n\
+		add_test(NAME ${PROJECT_NAME}_tests\n\
+			COMMAND ${PROJECT_NAME}_tests\n\
+		)\n\
 	endif()\n\
 else()\n\
 	get_filename_component(CUTE_TARGET \"${CMAKE_CURRENT_SOURCE_DIR}\" NAME)\n\
