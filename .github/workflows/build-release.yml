@@ -27,9 +27,6 @@ jobs:
           - os: macos-latest
             c_compiler: clang
             asset_name: macos-arm64
-          - os: macos-15-intel
-            c_compiler: clang
-            asset_name: macos-x64
           - os: windows-latest
             c_compiler: cl
             asset_name: windows-x64
