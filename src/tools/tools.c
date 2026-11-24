@@ -16,33 +16,14 @@
 	extern char** environ;
 #endif
 
-char* format(const char* template_string, ...) {
-	if (template_string == NULL)
-		return NULL;
-
-	va_list args;
-
-	va_start(args, template_string);
-	int length = vsnprintf(NULL, 0, template_string, args);
-	va_end(args);
-
-	if (length < 1)
-		return NULL;
-
-	char* buffer = (char*)malloc(sizeof(char) * (length + 1));
-	if (buffer == NULL)
-		return NULL;
-
-	va_start(args, template_string);
-	int written = vsnprintf(buffer, length + 1, template_string, args);
-	va_end(args);
-
-	if (written != length) {
-		free(buffer);
-		return NULL;
+size_t slice_until(const char* string, char until) {
+	size_t i = 0;
+	for (; string[i] != '\0'; i++) {
+		if (string[i] == until)
+			return i;
 	}
 
-	return buffer;
+	return i;
 }
 
 // (End not inclusive)
@@ -77,6 +58,35 @@ char* bounded_strdup(const char* string, size_t start, size_t end) {
 	}
 
 	return new_string;
+}
+
+char* format(const char* template_string, ...) {
+	if (template_string == NULL)
+		return NULL;
+
+	va_list args;
+
+	va_start(args, template_string);
+	int length = vsnprintf(NULL, 0, template_string, args);
+	va_end(args);
+
+	if (length < 1)
+		return NULL;
+
+	char* buffer = (char*)malloc(sizeof(char) * (length + 1));
+	if (buffer == NULL)
+		return NULL;
+
+	va_start(args, template_string);
+	int written = vsnprintf(buffer, length + 1, template_string, args);
+	va_end(args);
+
+	if (written != length) {
+		free(buffer);
+		return NULL;
+	}
+
+	return buffer;
 }
 
 void flatten_directory_name(char* buffer) {

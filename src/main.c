@@ -3,10 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "tools/tools.h"
+#include "version.h"
 #include "error.h"
+#include "tools/tools.h"
 #include "commands/new.h"
 #include "commands/add.h"
+#include "commands/update.h"
 #include "commands/build.h"
 #include "commands/fetch.h"
 #include "commands/clean.h"
@@ -19,12 +21,14 @@ int main(int argc, char* argv[]) {
 	}
 
 	// handle actual command
-	cute_error_t err = (cute_error_t){
-		.status_code = CUTE_SUCCESS,
-		.message = ""
-	};
+	cute_error_t err;
 	if (strcmp(argv[1], "--version") == 0) {
 		printf("%s\n", VERSION);
+
+		err = (cute_error_t){
+			.status_code = CUTE_SUCCESS,
+			.message = ""
+		};
 	} else if (strcmp(argv[1], "version") == 0) {
 		err = check_version();
 	} else if (strcmp(argv[1], "new") == 0) {
@@ -34,9 +38,13 @@ int main(int argc, char* argv[]) {
 	} else if (strcmp(argv[1], "remove") == 0) {
 		// TODO
 		printf("Not yet implemented...\n");
+
+		err = (cute_error_t){
+			.status_code = CUTE_SUCCESS,
+			.message = ""
+		};
 	} else if (strcmp(argv[1], "update") == 0) {
-		// TODO
-		printf("Note yet implemented\n");
+		err = update_packages(argc, argv);
 	} else if (strcmp(argv[1], "clean") == 0) {
 		err = clean();
 	} else if (strcmp(argv[1], "build") == 0) {
@@ -54,6 +62,11 @@ int main(int argc, char* argv[]) {
 		free(cute_ini);
 	} else {
 		printf("Unknown argument supplied... doing nothing!\n");
+
+		err = (cute_error_t){
+			.status_code = CUTE_SUCCESS,
+			.message = ""
+		};
 	}
 
 	if (err.status_code != CUTE_SUCCESS) {

@@ -33,11 +33,18 @@ cute add GitHubUser/CutePackageRepo
 
 > Note: cute expects packages to be Git repositories.
 > By default it will look for the package on GitHub.
-> Not yet supported, but you can specify a URL and it will happily clone any valid Git repository (using Git under the hood).
+> Not yet supported, but in future you may be able to specify a URL and it will happily clone any valid Git repository (using Git under the hood).
 
 Once a package is added, it's ready to use.
 
 When you're ready, run `cute build` to build your project!
+
+## Libraries
+To make your own library, follow the steps above and make sure your library is hosted in a GitHub repository you have access to.
+Then anyone with access to your GitHub repository can simply `cute add` it to their package.
+To release a version of your package, make sure the version in `Cute.ini` is correct, then simply release a tag with said version.
+
+> Note: versions must start with 'v' and be valid SemVer 2.0.0 versions, otherwise `cute` will ignore them ().
 
 ## Example
 
@@ -84,15 +91,6 @@ Hello, world!
 
 Refer to the `examples` folder to see more examples of cute projects.
 
-## Planned functionality
- - Initialise a C program (similar to `cargo new`)
- - 'Install' libraries (similar to `cargo add`, will be limited as to where they can be installed from)
-     - Header libraries: just added as a header in `.includes/`
-     - Linked libraries: will be added as a project in `.libraries/`
- - To track project dependencies and versions, `Cute.ini` will be used
-     - `Cute.ini` can be modified directly or can be modified using `cute add <package> <?version>`
-     - Dependencies of your dependencies will be listed in `Cute.lock` and stored in `.includes/` and `.libraries/`
-
 ## Cute.ini
 Format:
 ```ini
@@ -118,7 +116,7 @@ package-a = "https://somedomain.ext/path/to/repo.git"
 ## Building from source
 You will need...
  - A C compiler
- - CMake
+ - [CMake](http://cmake.org)
 
 To build:
 ```sh

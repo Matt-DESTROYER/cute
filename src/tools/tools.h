@@ -8,8 +8,9 @@
 #endif
 
 #include <stdbool.h>
-#include <stdlib.h>
+#include <stddef.h>
 
+size_t slice_until(const char* string, char until);
 char* bounded_strdup(const char* string, size_t start, size_t end);
 
 char* format(const char* template_string, ...);
