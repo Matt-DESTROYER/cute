@@ -1,6 +1,7 @@
 #include <file-io.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "../tools/tools.h"
@@ -12,7 +13,7 @@
 cute_error_t test(int argc, char* argv[]) {
 	bool release = false;
 
-	for (int i = 0; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--release") == 0) {
 			release = true;
 			break;
@@ -67,7 +68,7 @@ cute_error_t test(int argc, char* argv[]) {
 	}
 
 	char* build = format(
-		"cmake --build \"$s/build\" --config %s",
+		"cmake --build \"%s/build\" --config %s",
 		project_root, config
 	);
 
