@@ -89,12 +89,12 @@ cute_error_t test(int argc, char* argv[]) {
 	char* run_tests;
 	if (tests.length == 0) {
 		run_tests = format(
-			"cmake -E chdir \"%s/build\" ctest --output-on-failure",
+			"cmake -E chdir \"%s/build\" ctest --output-on-failure --no-tests=error",
 			project_root
 		);
 	} else if (tests.length == 1) {
 		run_tests = format(
-			"cmake -E chdir \"%s/build\" ctest --output-on-failure -R \"^(%s)$\"",
+			"cmake -E chdir \"%s/build\" ctest --output-on-failure --no-tests=error -R \"^(%s)$\"",
 			project_root, (char*)tests.head->data
 		);
 	} else {
@@ -131,7 +131,7 @@ cute_error_t test(int argc, char* argv[]) {
 		tests_buffer[tests_buffer_idx] = '\0';
 
 		run_tests = format(
-			"cmake -E chdir \"%s/build\" ctest --output-on-failure -R \"^(%s)$\"",
+			"cmake -E chdir \"%s/build\" ctest --output-on-failure --no-tests=error -R \"^(%s)$\"",
 			project_root, tests_buffer
 		);
 		free(tests_buffer);
