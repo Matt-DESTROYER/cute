@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <string.h>
 
 #include "../tools/tools.h"
@@ -15,19 +16,42 @@ bool test_name_eq(void* x, void* y) {
 	return strcmp((char*)x, (char*)y) == 0;
 }
 
+bool valid_test_name(const char* name) {
+	for (size_t i = 0; name[i] != '\0'; i++) {
+		if (!isalnum((unsigned char)name[i])
+				&& name[i] != '_'
+				&& name[i] != '-'
+				&& name[i] != '.'
+				&& name[i] != '/')
+			return false;
+	}
+
+	return name[0] != '\0';
+}
+
 cute_error_t test(int argc, char* argv[]) {
 	bool release = false;
 	list_t tests = list_new(test_name_eq);
 	for (int i = 2; i < argc; i++) {
 		if (argv[i][0] != '-') {
-			if (!list_append(&tests, argv[i]))
+			if (!valid_test_name(argv[i])) {
+				list_free(&tests);
+				return (cute_error_t){
+					.status_code = CUTE_ERROR_INVALID_ARGUMENT,
+					.message = "Invalid test name."
+				};
+			}
+			if (!list_append(&tests, argv[i])) {
+				list_free(&tests);
 				return (cute_error_t){
 					.status_code = CUTE_ERROR_OUT_OF_MEMORY,
 					.message = "Failed to append test case."
 				};
+			}
 		} else if (strcmp(argv[i], "--release") == 0) {
 			release = true;
 		} else {
+			list_free(&tests);
 			return (cute_error_t){
 				.status_code = CUTE_ERROR_INVALID_FLAG,
 				.message = "Invalid argument found."
