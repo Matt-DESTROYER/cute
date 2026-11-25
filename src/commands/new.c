@@ -77,6 +77,10 @@ if(IS_ROOT_PROJECT)\n\
 	endif()\n\
 \n\
 	if(BUILD_TESTING AND NOT EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/src/main.c\")\n\
+		target_include_directories(${CUTE_TARGET} PUBLIC\n\
+			\"${CMAKE_CURRENT_SOURCE_DIR}/src\"\n\
+		)\n\
+\n\
 		file(GLOB_RECURSE TEST_FILES\n\
 			\"${CMAKE_CURRENT_SOURCE_DIR}/tests/*.c\"\n\
 		)\n\
