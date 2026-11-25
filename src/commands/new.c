@@ -35,7 +35,6 @@ project(%s C)\n\
 set(CMAKE_C_STANDARD 11)\n\
 set(CMAKE_C_STANDARD_REQUIRED ON)\n\
 set(CMAKE_C_EXTENSIONS OFF)\n\
-include(CTest)\n\
 \n\
 file(GLOB_RECURSE SRC\n\
 	\"${CMAKE_CURRENT_SOURCE_DIR}/src/*.c\"\n\
@@ -77,17 +76,34 @@ if(IS_ROOT_PROJECT)\n\
 		target_link_libraries(${CUTE_TARGET} PRIVATE ${PACKAGE_TARGETS})\n\
 	endif()\n\
 \n\
-	if(BUILD_TESTING AND EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/test.c\")\n\
-		add_executable(${PROJECT_NAME}_tests test.c)\n\
-\n\
-		target_link_libraries(${PROJECT_NAME}_tests PRIVATE\n\
-			${CUTE_TARGET}\n\
-			${PACKAGE_TARGETS}\n\
+	if(BUILD_TESTING AND NOT EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/src/main.c\")\n\
+		file(GLOB_RECURSE TEST_FILES\n\
+			\"${CMAKE_CURRENT_SOURCE_DIR}/tests/*.c\"\n\
 		)\n\
 \n\
-		add_test(NAME ${PROJECT_NAME}_tests\n\
-			COMMAND ${PROJECT_NAME}_tests\n\
-		)\n\
+		foreach(TEST_FILE ${TEST_FILES})\n\
+			file(RELATIVE_PATH TEST_NAME\n\
+				\"${CMAKE_CURRENT_SOURCE_DIR}/tests\"\n\
+				\"${TEST_FILE}\"\n\
+			)\n\
+\n\
+			string(REGEX REPLACE \"[.]c$\" \"\" TEST_NAME \"${TEST_NAME}\")\n\
+			string(REPLACE \"/\" \"_\" TEST_TARGET_NAME \"${TEST_NAME}\")\n\
+\n\
+			set(TEST_TARGET \"${PROJECT_NAME}_test_${TEST_TARGET_NAME}\")\n\
+\n\
+			add_executable(${TEST_TARGET} \"${TEST_FILE}\")\n\
+\n\
+			target_link_libraries(${TEST_TARGET} PRIVATE\n\
+				${CUTE_TARGET}\n\
+				${PACKAGE_TARGETS}\n\
+			)\n\
+\n\
+			add_test(\n\
+				NAME \"${TEST_NAME}\"\n\
+				COMMAND \"${TEST_TARGET}\"\n\
+			)\n\
+		endforeach()\n\
 	endif()\n\
 else()\n\
 	get_filename_component(CUTE_TARGET \"${CMAKE_CURRENT_SOURCE_DIR}\" NAME)\n\
@@ -186,6 +202,8 @@ cute_error_t new_project(int argc, char* argv[]) {
 		? format("%s/%s.c", src_dir, project_name)
 		: format("%s/main.c", src_dir);
 
+	char* tests_dir = format("%s/tests", directory);
+
 	char* libraries_dir = format("%s/.libraries", directory);
 
 	if (!init) {
@@ -218,7 +236,9 @@ cute_error_t new_project(int argc, char* argv[]) {
 	file_close(gitignore_file);
 
 	directory_create(src_dir);
+	directory_create(tests_dir);
 	directory_create(libraries_dir);
+	free(tests_dir);
 	free(libraries_dir);
 
 	if (!file_exists(main_path)) {
@@ -241,7 +261,7 @@ cute_error_t new_project(int argc, char* argv[]) {
 			file_t header_file = file_open(header_path, WRITE_BINARY);
 
 			if (header_file != NULL)
-				file_write(header_file, header_txt, strlen(HEADER));
+				file_write(header_file, header_txt, strlen(header_txt));
 			file_close(header_file);
 		}
 

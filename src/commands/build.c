@@ -35,7 +35,7 @@ cute_error_t build(int argc, char* argv[]) {
 
 	int exit_code;
 
-	char* prepare = format("cmake -S \"%s\" -B \"%s/build\" -DCMAKE_BUILD_TYPE=%s",
+	char* prepare = format("cmake -S \"%s\" -B \"%s/build\" -DCMAKE_BUILD_TYPE=%s -DBUILD_TESTING=OFF",
 		project_root, project_root, release ? RELEASE : DEBUG);
 	exit_code = system(prepare);
 	free(prepare);
